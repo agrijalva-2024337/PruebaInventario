@@ -1,0 +1,2 @@
+# PruebaInventario
+Inventario de equipos
