@@ -1,0 +1,53 @@
+import { asignaciones } from '@/features/asignaciones/mocks/asignaciones';
+import { apiPaths } from '@/shared/api/paths';
+import { env } from '@/shared/config/env';
+import httpClient from '@/shared/services/httpClient';
+import { createMockCrudService } from '@/shared/services/createMockCrudService';
+
+const crud = createMockCrudService({
+  endpoint: apiPaths.asignaciones,
+  seed: asignaciones,
+});
+
+export const { getAll, getById } = crud;
+
+async function post(path, data) {
+  if (env.useApiMock) {
+    return crud.create(data);
+  }
+
+  const response = await httpClient.post(path, data);
+  return response.data;
+}
+
+export function entregar(data) {
+  return post(`${apiPaths.asignaciones}/entrega`, data);
+}
+
+export function trasladar(data) {
+  return post(`${apiPaths.asignaciones}/traslado`, data);
+}
+
+export function iniciarMantenimiento(data) {
+  return post(`${apiPaths.asignaciones}/mantenimiento`, data);
+}
+
+export function darDeBaja(data) {
+  return post(`${apiPaths.asignaciones}/baja`, data);
+}
+
+export async function devolver(id, data) {
+  if (env.useApiMock) {
+    return crud.update(id, { ...data, activa: false });
+  }
+
+  await httpClient.post(`${apiPaths.asignaciones}/${id}/devolver`, data);
+}
+
+export async function finalizarMantenimiento(id, data) {
+  if (env.useApiMock) {
+    return crud.update(id, { ...data, activa: false });
+  }
+
+  await httpClient.post(`${apiPaths.asignaciones}/${id}/finalizar-mantenimiento`, data);
+}

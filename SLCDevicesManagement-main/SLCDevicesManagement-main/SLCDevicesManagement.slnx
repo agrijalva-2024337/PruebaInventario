@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SLCDM.Api/SLCDM.Api.csproj" />
+    <Project Path="src/SLCDM.Application/SLCDM.Application.csproj" />
+    <Project Path="src/SLCDM.Domain/SLCDM.Domain.csproj" />
+    <Project Path="src/SLCDM.Persistence/SLCDM.Persistence.csproj" />
+  </Folder>
+</Solution>

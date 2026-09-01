@@ -1,0 +1,38 @@
+export const responsables = [
+  {
+    id: 1,
+    idArea: 3,
+    nombreCompleto: 'Rosa Elena García',
+    cargo: 'Jefa de TI',
+    correo: 'rgarcia@slc.com.gt',
+    telefono: '2331-8801',
+    habilitado: true,
+  },
+  {
+    id: 2,
+    idArea: 1,
+    nombreCompleto: 'Miguel Ángel Pérez',
+    cargo: 'Encargado de bodega',
+    correo: 'mperez@slc.com.gt',
+    telefono: '2294-1510',
+    habilitado: true,
+  },
+  {
+    id: 3,
+    idArea: 6,
+    nombreCompleto: 'Lucía Fernanda Chávez',
+    cargo: 'Coordinadora de flota',
+    correo: 'lchavez@slc.com.gt',
+    telefono: '2435-6712',
+    habilitado: true,
+  },
+  {
+    id: 4,
+    idArea: 5,
+    nombreCompleto: 'Pablo José Recinos',
+    cargo: 'Supervisor portuario',
+    correo: 'precinos@slc.com.gt',
+    telefono: '7881-0502',
+    habilitado: false,
+  },
+];

@@ -1,0 +1,28 @@
+export const asignaciones = [
+  {
+    id: 1,
+    idActivo: 1,
+    idUsuario: 2,
+    idResponsable: 1,
+    idEstado: 2,
+    idTipoAsignacion: 1,
+    fechaAsignacion: '2026-01-10',
+    fechaDevolucion: null,
+    activa: true,
+    observaciones: 'Asignada a jefatura de TI Reforma.',
+    documentoPdfUrl: null,
+  },
+  {
+    id: 2,
+    idActivo: 3,
+    idUsuario: 3,
+    idResponsable: 3,
+    idEstado: 2,
+    idTipoAsignacion: 2,
+    fechaAsignacion: '2026-05-02',
+    fechaDevolucion: '2026-08-15',
+    activa: false,
+    observaciones: 'Préstamo cerrado. Vehículo de vuelta a patio.',
+    documentoPdfUrl: null,
+  },
+];

@@ -1,0 +1,32 @@
+export const bitacoras = [
+  {
+    id: 1,
+    idUsuario: 2,
+    fechaHora: '2026-08-20T09:15:00',
+    tipoOperacion: 0,
+    entidadAfectada: 'Empresa',
+    descripcion: 'Alta de empresa SLC Transportes del Pacífico.',
+    informacionAnterior: null,
+    informacionNueva: '{"id":2,"nombre":"SLC Transportes del Pacífico, S.A."}',
+  },
+  {
+    id: 2,
+    idUsuario: 3,
+    fechaHora: '2026-08-22T14:40:00',
+    tipoOperacion: 1,
+    entidadAfectada: 'Sede',
+    descripcion: 'Actualización de dirección del CD Zona 12.',
+    informacionAnterior: '{"direccion":"Calzada Atanasio Tzul"}',
+    informacionNueva: '{"direccion":"Calzada Atanasio Tzul 22-00, Zona 12"}',
+  },
+  {
+    id: 3,
+    idUsuario: 2,
+    fechaHora: '2026-08-25T11:05:00',
+    tipoOperacion: 2,
+    entidadAfectada: 'Proveedor',
+    descripcion: 'Inactivación de Frío Industrial Chapín.',
+    informacionAnterior: '{"habilitado":true}',
+    informacionNueva: '{"habilitado":false}',
+  },
+];
