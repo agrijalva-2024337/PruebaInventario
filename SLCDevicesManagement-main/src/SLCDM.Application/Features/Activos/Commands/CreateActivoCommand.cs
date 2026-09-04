@@ -21,7 +21,8 @@ public sealed record CreateActivoCommand(
     string? Moneda,
     string? NumeroFactura,
     DateTime FechaVencimientoGarantia,
-    string? Observaciones);
+    string? Observaciones,
+    string? PerifericosAdicionales);
 
 public sealed class CreateActivoCommandValidator : AbstractValidator<CreateActivoCommand>
 {
@@ -85,6 +86,10 @@ public sealed class CreateActivoCommandValidator : AbstractValidator<CreateActiv
         RuleFor(x => x.Observaciones)
             .MaximumLength(500).WithMessage("El campo observaciones no debe superar los 500 caracteres.")
             .When(x => !string.IsNullOrWhiteSpace(x.Observaciones));
+
+        RuleFor(x => x.PerifericosAdicionales)
+            .MaximumLength(300).WithMessage("El campo perifericos adicionales no debe superar los 300 caracteres.")
+            .When(x => !string.IsNullOrWhiteSpace(x.PerifericosAdicionales));
     }
 
     private static async Task<bool> SerieUnicaEnEmpresaAsync(

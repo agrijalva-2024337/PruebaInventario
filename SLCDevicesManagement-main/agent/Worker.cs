@@ -41,6 +41,10 @@ public sealed class Worker : BackgroundService
                 }
                 else
                 {
+                    _logger.LogInformation(
+                        "Ping BSSID={Bssid} GPS={Gps}",
+                        bssid ?? "(ninguno)",
+                        coords is null ? "(ninguno)" : $"{coords.Value.Latitud},{coords.Value.Longitud}");
                     await EnviarPingAsync(token, bssid, coords, stoppingToken);
                 }
             }
@@ -97,8 +101,22 @@ public sealed class Worker : BackgroundService
         var salida = proceso.StandardOutput.ReadToEnd();
         proceso.WaitForExit();
 
-        var match = Regex.Match(salida, @"BSSID\s*:\s*([0-9a-fA-F:]{17})");
-        return match.Success ? match.Groups[1].Value.ToLowerInvariant() : null;
+        var match = Regex.Match(
+            salida,
+            @"BSSID[^:]*:\s*([0-9a-fA-F]{2}([:\-\s][0-9a-fA-F]{2}){5})",
+            RegexOptions.IgnoreCase);
+        if (!match.Success)
+        {
+            return null;
+        }
+
+        var hex = Regex.Replace(match.Groups[1].Value, "[^0-9a-fA-F]", string.Empty).ToLowerInvariant();
+        if (hex.Length != 12)
+        {
+            return null;
+        }
+
+        return string.Join(":", Enumerable.Range(0, 6).Select(i => hex.Substring(i * 2, 2)));
     }
 
     private async Task EnviarPingAsync(

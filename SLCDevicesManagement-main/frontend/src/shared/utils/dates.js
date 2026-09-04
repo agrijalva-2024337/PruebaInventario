@@ -30,3 +30,17 @@ export function formatDate(value) {
 
   return date.toLocaleDateString('es-GT');
 }
+
+export function formatDateTime(value) {
+  if (!value) {
+    return '—';
+  }
+
+  const raw = String(value);
+  const date = /Z$|[+-]\d{2}:\d{2}$/.test(raw) ? new Date(raw) : new Date(`${raw}Z`);
+  if (Number.isNaN(date.getTime())) {
+    return raw;
+  }
+
+  return date.toLocaleString('es-GT');
+}

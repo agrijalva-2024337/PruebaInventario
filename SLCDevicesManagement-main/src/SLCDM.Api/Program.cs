@@ -11,6 +11,16 @@ builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.Configure<SLCDM.Application.Common.Options.DeviceTrackingOptions>(
     builder.Configuration.GetSection(SLCDM.Application.Common.Options.DeviceTrackingOptions.SectionName));
+builder.Services.Configure<SLCDM.Application.Common.Options.SmtpOptions>(
+    builder.Configuration.GetSection(SLCDM.Application.Common.Options.SmtpOptions.SectionName));
+builder.Services.Configure<SLCDM.Application.Common.Options.BrandingOptions>(options =>
+{
+    options.LetterheadPath = Path.Combine(
+        builder.Environment.ContentRootPath,
+        "wwwroot",
+        "HojaMembrentadaSLC.pdf");
+});
+builder.Services.AddSingleton<SLCDM.Application.Common.Interfaces.IEmailSender, SLCDM.Api.Email.SmtpEmailSender>();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddDeviceTokenAuthentication();
 builder.Services.AddRateLimitingPolicies();

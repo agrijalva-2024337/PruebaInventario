@@ -5,6 +5,7 @@ using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using SLCDM.Application.Common.Interfaces;
 using SLCDM.Application.Common.Security;
+using SLCDM.Application.Features.Asignaciones;
 
 namespace SLCDM.Application;
 
@@ -21,6 +22,8 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHashService, PasswordHashService>();
         services.AddSingleton<IDeviceTokenHashService, DeviceTokenHashService>();
         services.AddSingleton<IPasswordGenerator, PasswordGenerator>();
+        services.AddScoped<IAsignacionPdfService, AsignacionPdfService>();
+        services.AddScoped<IAsignacionCorreoService, AsignacionCorreoService>();
 
         services.AddValidatorsFromAssembly(assembly);
         RegisterHandlers(services, assembly);

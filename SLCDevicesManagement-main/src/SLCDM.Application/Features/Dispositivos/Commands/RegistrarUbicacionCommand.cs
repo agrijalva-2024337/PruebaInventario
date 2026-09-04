@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SLCDM.Application.Common;
 using Microsoft.Extensions.Options;
 using SLCDM.Application.Common.Exceptions;
 using SLCDM.Application.Common.Interfaces;
@@ -31,9 +32,7 @@ public sealed class RegistrarUbicacionCommandHandler : ICommandHandler<Registrar
 
     public async Task HandleAsync(RegistrarUbicacionCommand command, CancellationToken cancellationToken = default)
     {
-        var bssid = string.IsNullOrWhiteSpace(command.Bssid)
-            ? null
-            : command.Bssid.Trim().ToLowerInvariant();
+        var bssid = BssidFormat.Normalize(command.Bssid);
 
         var activo = await _db.Activos.IgnoreQueryFilters()
             .FirstOrDefaultAsync(a => a.Id == command.IdActivo, cancellationToken)
@@ -45,26 +44,29 @@ public sealed class RegistrarUbicacionCommandHandler : ICommandHandler<Registrar
 
         var redConocida = bssid is null
             ? null
-            : await _db.RedesConocidas.IgnoreQueryFilters()
+            : (await _db.RedesConocidas.IgnoreQueryFilters()
                 .Include(r => r.Ubicacion)
-                .FirstOrDefaultAsync(r => r.Bssid == bssid, cancellationToken);
+                .ToListAsync(cancellationToken))
+                .FirstOrDefault(r => BssidFormat.Normalize(r.Bssid) == bssid);
 
         var ubicacionDetectada = redConocida?.Ubicacion;
-        var reportoGps = EsCoordenadaValida(command.Latitud, command.Longitud);
+        var gpsOk = GeoCoords.EsUtilizable(command.Latitud, command.Longitud);
+        var wifiCoordsOk = ubicacionDetectada is not null
+            && GeoCoords.EsUtilizable(ubicacionDetectada.Latitud, ubicacionDetectada.Longitud);
 
         token.UltimoBssid = bssid;
         token.UltimoUsoEn = DateTime.UtcNow;
         token.UltimaUbicacionDetectadaId = ubicacionDetectada?.Id;
 
-        if (reportoGps)
+        if (gpsOk)
         {
             token.UltimaLatitud = command.Latitud;
             token.UltimaLongitud = command.Longitud;
             token.OrigenCoordenada = "gps";
         }
-        else if (ubicacionDetectada is not null)
+        else if (wifiCoordsOk)
         {
-            token.UltimaLatitud = ubicacionDetectada.Latitud;
+            token.UltimaLatitud = ubicacionDetectada!.Latitud;
             token.UltimaLongitud = ubicacionDetectada.Longitud;
             token.OrigenCoordenada = "wifi";
         }
@@ -84,7 +86,7 @@ public sealed class RegistrarUbicacionCommandHandler : ICommandHandler<Registrar
         var ubicacionAsignada = await _db.Ubicaciones.IgnoreQueryFilters()
             .FirstOrDefaultAsync(u => u.Id == activo.IdUbicacion, cancellationToken);
 
-        var estaFueraDeRango = reportoGps
+        var estaFueraDeRango = gpsOk
             ? EstaFueraDeGeocerca(command.Latitud!.Value, command.Longitud!.Value, ubicacionAsignada)
             : ubicacionDetectada is null || ubicacionDetectada.Id != activo.IdUbicacion;
         var eraFueraDeRango = token.FueraDeRango;
@@ -105,7 +107,7 @@ public sealed class RegistrarUbicacionCommandHandler : ICommandHandler<Registrar
                 ? "El activo fue detectado fuera de la ubicacion asignada"
                 : "El activo volvio a la ubicacion asignada",
             InformacionAnterior = $"id_ubicacion_asignada={activo.IdUbicacion}",
-            InformacionNueva = reportoGps
+            InformacionNueva = gpsOk
                 ? $"origen=gps; lat={command.Latitud}; lng={command.Longitud}; bssid={bssid ?? "ninguno"}"
                 : ubicacionDetectada is not null
                     ? $"origen=wifi; id_ubicacion_detectada={ubicacionDetectada.Id}; bssid={bssid}"
@@ -121,10 +123,12 @@ public sealed class RegistrarUbicacionCommandHandler : ICommandHandler<Registrar
             return false;
         }
 
+        if (!GeoCoords.EsUtilizable(ubicacionAsignada.Latitud, ubicacionAsignada.Longitud))
+        {
+            return true;
+        }
+
         var radio = _options.GeofenceRadiusMeters > 0 ? _options.GeofenceRadiusMeters : 250;
         return GeoDistance.Meters(latitud, longitud, ubicacionAsignada.Latitud, ubicacionAsignada.Longitud) > radio;
     }
-
-    private static bool EsCoordenadaValida(decimal? latitud, decimal? longitud) =>
-        latitud is >= -90 and <= 90 && longitud is >= -180 and <= 180;
 }

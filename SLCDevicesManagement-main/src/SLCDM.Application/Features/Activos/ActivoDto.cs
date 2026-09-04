@@ -16,6 +16,7 @@ public sealed record ActivoDto(
     string? NumeroFactura,
     DateTime FechaVencimientoGarantia,
     string? Observaciones,
+    string? PerifericosAdicionales,
     string EstadoOperativo = "disponible",
     string EstadoNombre = "Disponible",
     string CodigoInterno = "",

@@ -42,6 +42,7 @@ internal static class ActivoDtoFactory
             item.NumeroFactura,
             item.FechaVencimientoGarantia,
             item.Observaciones,
+            item.PerifericosAdicionales,
             estado,
             ActivoEstadoOperativo.NombreVisible(estado),
             CodigoInterno(item.Id),

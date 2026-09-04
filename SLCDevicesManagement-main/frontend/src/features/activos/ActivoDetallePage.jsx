@@ -7,7 +7,7 @@ import { DataTable } from '@/shared/components/DataTable';
 import { Modal } from '@/shared/components/Modal';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { getErrorMessage } from '@/shared/utils/getErrorMessage';
-import { formatDate } from '@/shared/utils/dates';
+import { formatDate, formatDateTime } from '@/shared/utils/dates';
 import { useAuth } from '@/features/auth/AuthContext';
 import { canWriteOperativa } from '@/features/auth/permissions';
 import { QrCodeCard } from '@/features/activos/QrCodeCard';
@@ -30,15 +30,6 @@ import * as tipoAsignacionService from '@/features/organizacion/tiposAsignacion/
 import * as dispositivoService from '@/features/rastreo/dispositivoService';
 
 const MOVIMIENTO_KINDS = ['asignacion', 'traslado', 'mantenimiento', 'baja'];
-
-function formatDateTime(value) {
-  if (!value) {
-    return '—';
-  }
-
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('es-GT');
-}
 
 function origenCoordenadaLabel(origen) {
   if (origen === 'gps') {

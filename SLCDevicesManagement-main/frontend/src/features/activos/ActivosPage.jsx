@@ -36,6 +36,7 @@ const EMPTY_ACTIVO = {
   numeroFactura: '',
   fechaVencimientoGarantia: todayInputValue(),
   observaciones: '',
+  perifericosAdicionales: '',
 };
 
 function toFormValues(row) {
@@ -54,6 +55,7 @@ function toFormValues(row) {
     numeroFactura: row.numeroFactura ?? '',
     fechaVencimientoGarantia: toDateInput(row.fechaVencimientoGarantia) || todayInputValue(),
     observaciones: row.observaciones ?? '',
+    perifericosAdicionales: row.perifericosAdicionales ?? '',
   };
 }
 
@@ -73,6 +75,7 @@ function toPayload(values) {
     numeroFactura: values.numeroFactura || null,
     fechaVencimientoGarantia: toIsoDate(values.fechaVencimientoGarantia),
     observaciones: values.observaciones || null,
+    perifericosAdicionales: values.perifericosAdicionales || null,
   };
 }
 

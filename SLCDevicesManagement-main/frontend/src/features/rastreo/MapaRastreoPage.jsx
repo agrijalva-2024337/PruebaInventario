@@ -12,6 +12,16 @@ function toNumber(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+function esCoordUtil(lat, lng) {
+  if (lat == null || lng == null) {
+    return false;
+  }
+  if (Math.abs(lat) < 0.05 && Math.abs(lng) < 0.05) {
+    return false;
+  }
+  return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+}
+
 function etiquetaOrigen(origen) {
   if (origen === 'gps') {
     return 'GPS del equipo';
@@ -25,7 +35,7 @@ function etiquetaOrigen(origen) {
 function puntoVisible(row) {
   const deviceLat = toNumber(row.ultimaLatitud);
   const deviceLng = toNumber(row.ultimaLongitud);
-  if (deviceLat != null && deviceLng != null) {
+  if (esCoordUtil(deviceLat, deviceLng)) {
     return {
       lat: deviceLat,
       lng: deviceLng,
@@ -36,23 +46,12 @@ function puntoVisible(row) {
 
   const detectedLat = toNumber(row.ubicacionDetectada?.latitud);
   const detectedLng = toNumber(row.ubicacionDetectada?.longitud);
-  if (detectedLat != null && detectedLng != null) {
+  if (esCoordUtil(detectedLat, detectedLng)) {
     return {
       lat: detectedLat,
       lng: detectedLng,
       etiqueta: row.ubicacionDetectada.nombre,
       origen: 'detectada',
-    };
-  }
-
-  const assignedLat = toNumber(row.ubicacionAsignada?.latitud);
-  const assignedLng = toNumber(row.ubicacionAsignada?.longitud);
-  if (assignedLat != null && assignedLng != null) {
-    return {
-      lat: assignedLat,
-      lng: assignedLng,
-      etiqueta: row.ubicacionAsignada.nombre,
-      origen: 'asignada',
     };
   }
 
@@ -241,8 +240,8 @@ export function MapaRastreoPage() {
         title="Mapa de equipos"
         description={
           env.googleMapsApiKey
-            ? 'Cada pin es la última posición reportada por el activo (GPS del equipo o red Wi-Fi). El mapa usa Google Maps.'
-            : 'Cada pin es la última posición reportada por el activo (GPS del equipo o red Wi-Fi). El mapa usa OpenStreetMap (sin API key). Para Google Maps, poné VITE_GOOGLE_MAPS_API_KEY en frontend/.env.'
+            ? 'El pin es la última posición real del equipo (GPS usable o red Wi-Fi catalogada). No se usa 0,0 ni la sede asignada como si el equipo estuviera ahí. El mapa usa Google Maps.'
+            : 'El pin es la última posición real del equipo (GPS usable o red Wi-Fi catalogada). No se usa 0,0 ni la sede asignada como si el equipo estuviera ahí. OpenStreetMap (sin API key).'
         }
       />
 
@@ -284,7 +283,7 @@ export function MapaRastreoPage() {
                   <p className="text-slate-500">
                     {punto
                       ? `${punto.etiqueta} (${punto.origen})`
-                      : 'Sin coordenadas: red desconocida o ubicación sin lat/lng'}
+                      : 'Sin coordenadas reales: red desconocida, GPS vacío (0,0) o ubicación sin lat/lng válidos'}
                   </p>
                 </div>
                 <Badge variant={row.fueraDeRango ? 'danger' : 'success'}>

@@ -148,6 +148,7 @@
  * @property {string | null} numeroFactura
  * @property {string} fechaVencimientoGarantia
  * @property {string | null} observaciones
+ * @property {string | null} [perifericosAdicionales]
  * @property {string} [estadoOperativo]
  * @property {string} [estadoNombre]
  *

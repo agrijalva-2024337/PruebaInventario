@@ -96,6 +96,11 @@ namespace SLCDM.Persistence.Migrations
                         .HasColumnType("varchar(500)")
                         .HasColumnName("observaciones");
 
+                    b.Property<string>("PerifericosAdicionales")
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar(300)")
+                        .HasColumnName("perifericos_adicionales");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IdCategoriaActivo");

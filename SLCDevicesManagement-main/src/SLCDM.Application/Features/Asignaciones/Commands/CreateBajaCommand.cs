@@ -64,15 +64,18 @@ public sealed class CreateBajaCommandHandler : ICommandHandler<CreateBajaCommand
 {
     private readonly IApplicationDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAsignacionCorreoService _correo;
     private readonly IValidator<CreateBajaCommand> _validator;
 
     public CreateBajaCommandHandler(
         IApplicationDbContext db,
         ICurrentUserService currentUser,
+        IAsignacionCorreoService correo,
         IValidator<CreateBajaCommand> validator)
     {
         _db = db;
         _currentUser = currentUser;
+        _correo = correo;
         _validator = validator;
     }
 
@@ -142,6 +145,8 @@ public sealed class CreateBajaCommandHandler : ICommandHandler<CreateBajaCommand
                 $"motivo={command.Motivo}; documento_pdf_url={command.DocumentoPdfUrl}; id_responsable={command.IdResponsable}"
         });
         await _db.SaveChangesAsync(cancellationToken);
+
+        await _correo.NotificarResponsableAsync(entity.Id, cancellationToken);
 
         return entity.Id;
     }

@@ -5,21 +5,9 @@ import { Badge } from '@/shared/components/Badge';
 import { DataTable } from '@/shared/components/DataTable';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { getErrorMessage } from '@/shared/utils/getErrorMessage';
+import { formatDateTime } from '@/shared/utils/dates';
 import * as ubicacionService from '@/features/catalogos/ubicaciones/ubicacionService';
 import * as dispositivoService from '@/features/rastreo/dispositivoService';
-
-function formatDateTime(value) {
-  if (!value) {
-    return '—';
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
-  }
-
-  return date.toLocaleString('es-GT');
-}
 
 export function FueraDeRangoPage() {
   const [rows, setRows] = useState([]);
