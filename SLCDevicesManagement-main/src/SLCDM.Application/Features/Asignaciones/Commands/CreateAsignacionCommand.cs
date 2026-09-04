@@ -36,7 +36,7 @@ public sealed class CreateAsignacionCommandValidator : AbstractValidator<CreateA
 
         RuleFor(x => x.IdUsuario)
             .RequiredId("id usuario")
-            .MustAsync(async (id, ct) => await db.Usuarios.AnyAsync(u => u.Id == id, ct))
+            .MustAsync(async (id, ct) => await db.Usuarios.IgnoreQueryFilters().AnyAsync(u => u.Id == id, ct))
             .WithMessage("No se encontro un usuario (quien entrega) con el id informado.");
 
         RuleFor(x => x.IdResponsable)
@@ -103,16 +103,22 @@ public sealed class CreateAsignacionCommandValidator : AbstractValidator<CreateA
 public sealed class CreateAsignacionCommandHandler : ICommandHandler<CreateAsignacionCommand, int>
 {
     private readonly IApplicationDbContext _db;
+    private readonly ICurrentUserService _currentUser;
     private readonly IValidator<CreateAsignacionCommand> _validator;
 
-    public CreateAsignacionCommandHandler(IApplicationDbContext db, IValidator<CreateAsignacionCommand> validator)
+    public CreateAsignacionCommandHandler(
+        IApplicationDbContext db,
+        ICurrentUserService currentUser,
+        IValidator<CreateAsignacionCommand> validator)
     {
         _db = db;
+        _currentUser = currentUser;
         _validator = validator;
     }
 
     public async Task<int> HandleAsync(CreateAsignacionCommand command, CancellationToken cancellationToken = default)
     {
+        command = command with { IdUsuario = UsuarioSesion.IdQuienEntrega(_currentUser) };
         await _validator.ValidateAndThrowAsync(command, cancellationToken);
 
         var tipo = await _db.TiposAsignacion

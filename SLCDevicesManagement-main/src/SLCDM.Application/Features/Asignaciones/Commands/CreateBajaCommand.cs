@@ -32,7 +32,7 @@ public sealed class CreateBajaCommandValidator : AbstractValidator<CreateBajaCom
 
         RuleFor(x => x.IdUsuario)
             .RequiredId("id usuario")
-            .MustAsync(async (id, ct) => await db.Usuarios.AnyAsync(u => u.Id == id, ct))
+            .MustAsync(async (id, ct) => await db.Usuarios.IgnoreQueryFilters().AnyAsync(u => u.Id == id, ct))
             .WithMessage("No se encontro un usuario con el id informado.");
 
         RuleFor(x => x.IdResponsable)
@@ -63,16 +63,22 @@ public sealed class CreateBajaCommandValidator : AbstractValidator<CreateBajaCom
 public sealed class CreateBajaCommandHandler : ICommandHandler<CreateBajaCommand, int>
 {
     private readonly IApplicationDbContext _db;
+    private readonly ICurrentUserService _currentUser;
     private readonly IValidator<CreateBajaCommand> _validator;
 
-    public CreateBajaCommandHandler(IApplicationDbContext db, IValidator<CreateBajaCommand> validator)
+    public CreateBajaCommandHandler(
+        IApplicationDbContext db,
+        ICurrentUserService currentUser,
+        IValidator<CreateBajaCommand> validator)
     {
         _db = db;
+        _currentUser = currentUser;
         _validator = validator;
     }
 
     public async Task<int> HandleAsync(CreateBajaCommand command, CancellationToken cancellationToken = default)
     {
+        command = command with { IdUsuario = UsuarioSesion.IdQuienEntrega(_currentUser) };
         await _validator.ValidateAndThrowAsync(command, cancellationToken);
 
         var tipo = await TipoAsignacionNombres.ObtenerRequeridoAsync(

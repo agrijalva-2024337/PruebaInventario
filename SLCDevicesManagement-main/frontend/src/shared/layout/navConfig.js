@@ -16,7 +16,11 @@ export const NAV_SECTIONS = [
     id: 'consultas',
     label: 'Consultas',
     defaultOpen: true,
-    items: [{ to: '/reportes', label: 'Reportes' }],
+    items: [
+      { to: '/reportes', label: 'Reportes' },
+      { to: '/rastreo/fuera-de-rango', label: 'Fuera de rango' },
+      { to: '/rastreo/mapa', label: 'Mapa de equipos' },
+    ],
   },
   {
     id: 'organizacion',
@@ -40,6 +44,7 @@ export const NAV_SECTIONS = [
       { to: '/catalogos/categorias', label: 'Categorías' },
       { to: '/catalogos/estados', label: 'Estados', requiresAdminGeneral: true },
       { to: '/catalogos/tipos-asignacion', label: 'Tipos de asignación', requiresAdminGeneral: true },
+      { to: '/catalogos/redes-conocidas', label: 'Redes Wi-Fi' },
       { to: '/catalogos/bitacora', label: 'Bitácora' },
     ],
   },

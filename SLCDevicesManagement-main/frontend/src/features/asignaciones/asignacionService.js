@@ -52,17 +52,40 @@ export async function finalizarMantenimiento(id, data) {
   await httpClient.post(`${apiPaths.asignaciones}/${id}/finalizar-mantenimiento`, data);
 }
 
+async function readBlobError(error) {
+  const data = error?.response?.data;
+  if (!(data instanceof Blob)) {
+    return error;
+  }
+
+  try {
+    const text = await data.text();
+    error.response.data = JSON.parse(text);
+  } catch {
+    error.message = 'No se pudo generar el PDF.';
+  }
+
+  return error;
+}
+
 export async function downloadPdf(id) {
   if (env.useApiMock) {
     throw new Error('El PDF no está disponible en modo mock.');
   }
 
-  const response = await httpClient.get(`${apiPaths.asignaciones}/${id}/pdf`, { responseType: 'blob' });
-  const blob = new Blob([response.data], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `acta-${id}.pdf`;
-  link.click();
-  URL.revokeObjectURL(url);
+  try {
+    const response = await httpClient.get(`${apiPaths.asignaciones}/${id}/pdf`, {
+      responseType: 'blob',
+      timeout: 60000,
+    });
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `acta-${id}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    throw await readBlobError(error);
+  }
 }

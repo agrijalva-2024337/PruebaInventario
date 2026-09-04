@@ -43,25 +43,54 @@ public sealed class GetHistorialAsignacionesPorActivoQueryHandler
             throw new NotFoundException("Activo", query.IdActivo);
         }
 
-        return await _db.Asignaciones
+        var filas = await _db.Asignaciones
             .AsNoTracking()
             .Where(a => a.IdActivo == query.IdActivo)
             .OrderByDescending(a => a.FechaAsignacion)
+            .Select(a => new
+            {
+                a.Id,
+                a.IdActivo,
+                a.IdUsuario,
+                a.IdResponsable,
+                ResponsableRecibe = a.Responsable != null ? a.Responsable.NombreCompleto : string.Empty,
+                a.IdUbicacion,
+                UbicacionUso = a.Ubicacion != null ? a.Ubicacion.Nombre : string.Empty,
+                a.IdTipoAsignacion,
+                TipoAsignacion = a.TipoAsignacion != null ? a.TipoAsignacion.Nombre : string.Empty,
+                a.FechaAsignacion,
+                a.FechaDevolucion,
+                a.Activa,
+                a.Observaciones
+            })
+            .ToListAsync(cancellationToken);
+
+        var idsUsuario = filas.Select(a => a.IdUsuario).Distinct().ToList();
+        var nombresUsuario = await _db.Usuarios
+            .AsNoTracking()
+            .IgnoreQueryFilters()
+            .Where(u => idsUsuario.Contains(u.Id))
+            .ToDictionaryAsync(
+                u => u.Id,
+                u => $"{u.Nombres} {u.Apellidos}".Trim(),
+                cancellationToken);
+
+        return filas
             .Select(a => new AsignacionHistorialDto(
                 a.Id,
                 a.IdActivo,
                 a.IdUsuario,
-                a.Usuario != null ? ((a.Usuario.Nombres + " " + a.Usuario.Apellidos).Trim()) : string.Empty,
+                nombresUsuario.GetValueOrDefault(a.IdUsuario) ?? string.Empty,
                 a.IdResponsable,
-                a.Responsable != null ? a.Responsable.NombreCompleto : string.Empty,
+                a.ResponsableRecibe,
                 a.IdUbicacion,
-                a.Ubicacion != null ? a.Ubicacion.Nombre : string.Empty,
+                a.UbicacionUso,
                 a.IdTipoAsignacion,
-                a.TipoAsignacion != null ? a.TipoAsignacion.Nombre : string.Empty,
+                a.TipoAsignacion,
                 a.FechaAsignacion,
                 a.FechaDevolucion,
                 a.Activa,
                 a.Observaciones))
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 }

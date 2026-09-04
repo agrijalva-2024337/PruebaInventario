@@ -31,7 +31,7 @@ public sealed class CreateTrasladoCommandValidator : AbstractValidator<CreateTra
 
         RuleFor(x => x.IdUsuario)
             .RequiredId("id usuario")
-            .MustAsync(async (id, ct) => await db.Usuarios.AnyAsync(u => u.Id == id, ct))
+            .MustAsync(async (id, ct) => await db.Usuarios.IgnoreQueryFilters().AnyAsync(u => u.Id == id, ct))
             .WithMessage("No se encontro un usuario con el id informado.");
 
         RuleFor(x => x.IdResponsable)
@@ -62,16 +62,22 @@ public sealed class CreateTrasladoCommandValidator : AbstractValidator<CreateTra
 public sealed class CreateTrasladoCommandHandler : ICommandHandler<CreateTrasladoCommand, int>
 {
     private readonly IApplicationDbContext _db;
+    private readonly ICurrentUserService _currentUser;
     private readonly IValidator<CreateTrasladoCommand> _validator;
 
-    public CreateTrasladoCommandHandler(IApplicationDbContext db, IValidator<CreateTrasladoCommand> validator)
+    public CreateTrasladoCommandHandler(
+        IApplicationDbContext db,
+        ICurrentUserService currentUser,
+        IValidator<CreateTrasladoCommand> validator)
     {
         _db = db;
+        _currentUser = currentUser;
         _validator = validator;
     }
 
     public async Task<int> HandleAsync(CreateTrasladoCommand command, CancellationToken cancellationToken = default)
     {
+        command = command with { IdUsuario = UsuarioSesion.IdQuienEntrega(_currentUser) };
         await _validator.ValidateAndThrowAsync(command, cancellationToken);
 
         var tipo = await TipoAsignacionNombres.ObtenerRequeridoAsync(

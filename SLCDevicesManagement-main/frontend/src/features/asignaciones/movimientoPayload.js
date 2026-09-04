@@ -68,9 +68,14 @@ export function emptyMovimientoForm(idActivo = '') {
 }
 
 export function buildMovimientoPayload(kind, values, usuario, tipos, proveedorOptions = []) {
+  const idUsuario = Number(usuario?.id ?? usuario?.Id);
+  if (!Number.isInteger(idUsuario) || idUsuario <= 0) {
+    throw new Error('No hay un usuario de sesión para registrar quien entrega. Cierra sesión y vuelve a entrar.');
+  }
+
   const base = {
     idActivo: Number(values.idActivo),
-    idUsuario: usuario.id,
+    idUsuario,
     idResponsable: Number(values.idResponsable),
     idUbicacion: Number(values.idUbicacion),
     fechaAsignacion: toIsoDate(values.fechaAsignacion),

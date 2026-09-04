@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SLCDM.Application.Common.Interfaces;
@@ -66,6 +67,15 @@ public static class AuthenticationExtensions
             });
 
         services.AddAuthorization();
+        return services;
+    }
+
+    public static IServiceCollection AddDeviceTokenAuthentication(this IServiceCollection services)
+    {
+        services.AddAuthentication()
+            .AddScheme<AuthenticationSchemeOptions, DeviceTokenAuthenticationHandler>(
+                DeviceTokenDefaults.AuthenticationScheme, _ => { });
+
         return services;
     }
 }

@@ -46,6 +46,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<HistoricoInventario> HistoricosInventario => Set<HistoricoInventario>();
     public DbSet<DetalleActivo> DetallesActivos => Set<DetalleActivo>();
     public DbSet<HistorialActivo> HistorialActivos => Set<HistorialActivo>();
+    public DbSet<DispositivoToken> DispositivosToken => Set<DispositivoToken>();
+    public DbSet<RedConocida> RedesConocidas => Set<RedConocida>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -100,5 +102,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             IgnoreEmpresaFilter
             || (h.IdAsignacion.HasValue && Asignaciones.Any(a => a.Id == h.IdAsignacion))
             || (h.IdDetalleActivo.HasValue && DetallesActivos.Any(d => d.Id == h.IdDetalleActivo)));
+
+        modelBuilder.Entity<DispositivoToken>().HasQueryFilter(d =>
+            IgnoreEmpresaFilter || Activos.Any(a => a.Id == d.IdActivo));
+
+        modelBuilder.Entity<RedConocida>().HasQueryFilter(r =>
+            IgnoreEmpresaFilter || Ubicaciones.Any(u => u.Id == r.IdUbicacion));
     }
 }

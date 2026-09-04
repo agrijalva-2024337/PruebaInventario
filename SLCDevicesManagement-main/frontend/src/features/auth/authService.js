@@ -24,8 +24,8 @@ function mapUsuario(dto) {
   }
 
   return {
-    id: dto.id,
-    username: dto.username,
+    id: Number(dto.id ?? dto.Id),
+    username: dto.username ?? dto.Username,
     nombre: dto.nombre,
     nombres: dto.nombre,
     apellidos: '',

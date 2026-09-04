@@ -27,8 +27,28 @@ import * as proveedorService from '@/features/catalogos/proveedores/proveedorSer
 import * as ubicacionService from '@/features/catalogos/ubicaciones/ubicacionService';
 import * as responsableService from '@/features/organizacion/responsables/responsableService';
 import * as tipoAsignacionService from '@/features/organizacion/tiposAsignacion/tipoAsignacionService';
+import * as dispositivoService from '@/features/rastreo/dispositivoService';
 
 const MOVIMIENTO_KINDS = ['asignacion', 'traslado', 'mantenimiento', 'baja'];
+
+function formatDateTime(value) {
+  if (!value) {
+    return '—';
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('es-GT');
+}
+
+function origenCoordenadaLabel(origen) {
+  if (origen === 'gps') {
+    return 'GPS del equipo';
+  }
+  if (origen === 'wifi') {
+    return 'Red Wi-Fi catalogada';
+  }
+  return '—';
+}
 
 function toOptions(items, labelKey = 'nombre') {
   return (items ?? [])
@@ -57,6 +77,7 @@ export function ActivoDetallePage() {
   const [banner, setBanner] = useState(null);
   const [movimientoKind, setMovimientoKind] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [rastreo, setRastreo] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,7 +85,7 @@ export function ActivoDetallePage() {
     async function load() {
       setIsLoading(true);
       try {
-        const [item, history, categorias, proveedores, ubicaciones, responsables, tipos, areas] =
+        const [item, history, categorias, proveedores, ubicaciones, responsables, tipos, areas, rastreoItem] =
           await Promise.all([
             activoService.getById(activoId),
             activoService.getHistorial(activoId),
@@ -74,11 +95,13 @@ export function ActivoDetallePage() {
             responsableService.getAll(),
             tipoAsignacionService.getAll(),
             areaService.getAll(),
+            dispositivoService.getRastreoByActivo(activoId).catch(() => null),
           ]);
         if (!cancelled) {
           setActivo(item);
           setHistorial(Array.isArray(history) ? history : []);
           setLookups({ categorias, proveedores, ubicaciones, responsables, tipos, areas });
+          setRastreo(rastreoItem);
         }
       } catch (error) {
         if (!cancelled) {
@@ -203,7 +226,7 @@ export function ActivoDetallePage() {
                 <dd>{proveedorNombre ?? activo.idProveedor}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-500">Ubicación</dt>
+                <dt className="text-xs uppercase tracking-wide text-slate-500">Ubicación asignada</dt>
                 <dd>{activo.nombreUbicacion || ubicacionNombre || activo.idUbicacion}</dd>
               </div>
               <div>
@@ -240,6 +263,58 @@ export function ActivoDetallePage() {
             <div className="rounded-lg border border-slate-200 bg-white p-3">
               <QrCodeCard activoId={activo.id} nombre={activo.nombre} />
             </div>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold">Última ubicación del equipo</h3>
+              {rastreo ? (
+                <Badge variant={rastreo.fueraDeRango ? 'danger' : 'success'}>
+                  {rastreo.fueraDeRango ? 'Fuera de rango' : 'En ubicación'}
+                </Badge>
+              ) : null}
+            </div>
+            {rastreo ? (
+              <dl className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Detectada</dt>
+                  <dd>{rastreo.ubicacionDetectada?.nombre || 'Red desconocida'}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Coordenadas</dt>
+                  <dd>
+                    {rastreo.ultimaLatitud != null && rastreo.ultimaLongitud != null
+                      ? `${rastreo.ultimaLatitud}, ${rastreo.ultimaLongitud}`
+                      : '—'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Origen</dt>
+                  <dd>{origenCoordenadaLabel(rastreo.origenCoordenada)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">BSSID</dt>
+                  <dd>{rastreo.ultimoBssid || '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Último ping</dt>
+                  <dd>{formatDateTime(rastreo.ultimoUsoEn)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-slate-500">Mapa</dt>
+                  <dd>
+                    <Link className="underline" to="/rastreo/mapa">
+                      Ver en el mapa
+                    </Link>
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="text-sm text-slate-500">
+                Este activo aún no reporta ubicación. Instalá el agente para ver dónde está el
+                equipo.
+              </p>
+            )}
           </div>
 
           {puedeMover ? (

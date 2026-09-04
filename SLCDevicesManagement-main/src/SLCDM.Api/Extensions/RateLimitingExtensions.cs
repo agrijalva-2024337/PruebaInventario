@@ -6,12 +6,23 @@ public static class RateLimitingExtensions
 {
     public const string AuthPolicy = "AuthPolicy";
     public const string ConsultaPolicy = "ConsultaPolicy";
+    public const string DeviceAutoRegistroPolicy = "DeviceAutoRegistroPolicy";
 
     public static IServiceCollection AddRateLimitingPolicies(this IServiceCollection services)
     {
         services.AddRateLimiter(options =>
         {
             options.AddPolicy(AuthPolicy, httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        AutoReplenishment = true,
+                        PermitLimit = 5,
+                        Window = TimeSpan.FromMinutes(1)
+                    }));
+
+            options.AddPolicy(DeviceAutoRegistroPolicy, httpContext =>
                 RateLimitPartition.GetFixedWindowLimiter(
                     partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                     factory: _ => new FixedWindowRateLimiterOptions

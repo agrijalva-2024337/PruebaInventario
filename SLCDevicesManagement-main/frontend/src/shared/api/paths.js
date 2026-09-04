@@ -25,6 +25,8 @@ export const apiPaths = {
   historicosInventario: '/api/historicosInventario',
   detallesActivo: '/api/detallesActivos',
   historialActivos: '/api/historialActivos',
+  dispositivos: '/api/dispositivos',
+  redesConocidas: '/api/redesConocidas',
   reportes: {
     inventarioGeneral: '/api/reportes/inventario-general',
     activos: '/api/reportes/activos',

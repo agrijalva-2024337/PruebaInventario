@@ -45,7 +45,6 @@ public sealed class GetAsignacionPdfQueryHandler : IQueryHandler<GetAsignacionPd
         var asignacion = await _db.Asignaciones
             .AsNoTracking()
             .Include(a => a.Activo)
-            .Include(a => a.Usuario)
             .Include(a => a.Responsable)
             .Include(a => a.Ubicacion)
             .Include(a => a.TipoAsignacion)
@@ -53,12 +52,17 @@ public sealed class GetAsignacionPdfQueryHandler : IQueryHandler<GetAsignacionPd
             .FirstOrDefaultAsync(a => a.Id == query.Id, cancellationToken)
             ?? throw new NotFoundException("Asignacion", query.Id);
 
+        var usuarioEntrega = await _db.Usuarios
+            .AsNoTracking()
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(u => u.Id == asignacion.IdUsuario, cancellationToken);
+
         var tipo = asignacion.TipoAsignacion?.Nombre ?? "Movimiento";
         var esBaja = TipoAsignacionNombres.EsNombre(tipo, TipoAsignacionNombres.Baja);
         var titulo = esBaja ? "Acta de baja de activo" : "Acta de asignación de activo";
-        var quienEntrega = asignacion.Usuario is null
+        var quienEntrega = usuarioEntrega is null
             ? $"Usuario #{asignacion.IdUsuario}"
-            : $"{asignacion.Usuario.Nombres} {asignacion.Usuario.Apellidos}".Trim();
+            : $"{usuarioEntrega.Nombres} {usuarioEntrega.Apellidos}".Trim();
         var quienRecibe = asignacion.Responsable?.NombreCompleto ?? $"Responsable #{asignacion.IdResponsable}";
         var fileName = esBaja
             ? $"acta-baja-{asignacion.Id}.pdf"

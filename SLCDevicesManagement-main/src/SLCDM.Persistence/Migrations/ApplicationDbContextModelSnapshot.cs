@@ -365,6 +365,85 @@ namespace SLCDM.Persistence.Migrations
                     b.ToTable("detalle_activo", (string)null);
                 });
 
+            modelBuilder.Entity("SLCDM.Domain.Entities.DispositivoToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id_dispositivo_token");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreadoEn")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("creado_en");
+
+                    b.Property<DateTime?>("ExpiraEn")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("expira_en");
+
+                    b.Property<bool>("FueraDeRango")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("fuera_de_rango");
+
+                    b.Property<int>("IdActivo")
+                        .HasColumnType("int")
+                        .HasColumnName("id_activo");
+
+                    b.Property<bool>("Revocado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("revocado");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("token_hash");
+
+                    b.Property<decimal?>("UltimaLatitud")
+                        .HasColumnType("decimal(9,6)")
+                        .HasColumnName("ultima_latitud");
+
+                    b.Property<decimal?>("UltimaLongitud")
+                        .HasColumnType("decimal(9,6)")
+                        .HasColumnName("ultima_longitud");
+
+                    b.Property<int?>("UltimaUbicacionDetectadaId")
+                        .HasColumnType("int")
+                        .HasColumnName("ultima_ubicacion_detectada_id");
+
+                    b.Property<string>("UltimoBssid")
+                        .HasMaxLength(17)
+                        .HasColumnType("varchar(17)")
+                        .HasColumnName("ultimo_bssid");
+
+                    b.Property<DateTime?>("UltimoUsoEn")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("ultimo_uso_en");
+
+                    b.Property<string>("OrigenCoordenada")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("origen_coordenada");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdActivo")
+                        .IsUnique()
+                        .HasFilter("[revocado] = 0");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UltimaUbicacionDetectadaId");
+
+                    b.ToTable("dispositivo_token", (string)null);
+                });
+
             modelBuilder.Entity("SLCDM.Domain.Entities.Empresa", b =>
                 {
                     b.Property<int>("Id")
@@ -630,6 +709,35 @@ namespace SLCDM.Persistence.Migrations
                     b.HasIndex("Nit");
 
                     b.ToTable("proveedor", (string)null);
+                });
+
+            modelBuilder.Entity("SLCDM.Domain.Entities.RedConocida", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id_red_conocida");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Bssid")
+                        .IsRequired()
+                        .HasMaxLength(17)
+                        .HasColumnType("varchar(17)")
+                        .HasColumnName("bssid");
+
+                    b.Property<int>("IdUbicacion")
+                        .HasColumnType("int")
+                        .HasColumnName("id_ubicacion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Bssid")
+                        .IsUnique();
+
+                    b.HasIndex("IdUbicacion");
+
+                    b.ToTable("red_conocida", (string)null);
                 });
 
             modelBuilder.Entity("SLCDM.Domain.Entities.Responsable", b =>
@@ -990,6 +1098,24 @@ namespace SLCDM.Persistence.Migrations
                     b.Navigation("HistoricoInventario");
                 });
 
+            modelBuilder.Entity("SLCDM.Domain.Entities.DispositivoToken", b =>
+                {
+                    b.HasOne("SLCDM.Domain.Entities.Activo", "Activo")
+                        .WithMany()
+                        .HasForeignKey("IdActivo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SLCDM.Domain.Entities.Ubicacion", "UltimaUbicacionDetectada")
+                        .WithMany()
+                        .HasForeignKey("UltimaUbicacionDetectadaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Activo");
+
+                    b.Navigation("UltimaUbicacionDetectada");
+                });
+
             modelBuilder.Entity("SLCDM.Domain.Entities.HistorialActivo", b =>
                 {
                     b.HasOne("SLCDM.Domain.Entities.Asignacion", "Asignacion")
@@ -1027,6 +1153,17 @@ namespace SLCDM.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("SLCDM.Domain.Entities.RedConocida", b =>
+                {
+                    b.HasOne("SLCDM.Domain.Entities.Ubicacion", "Ubicacion")
+                        .WithMany()
+                        .HasForeignKey("IdUbicacion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ubicacion");
                 });
 
             modelBuilder.Entity("SLCDM.Domain.Entities.Responsable", b =>

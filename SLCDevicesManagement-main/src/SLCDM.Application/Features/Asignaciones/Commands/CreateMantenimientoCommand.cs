@@ -35,7 +35,7 @@ public sealed class CreateMantenimientoCommandValidator : AbstractValidator<Crea
 
         RuleFor(x => x.IdUsuario)
             .RequiredId("id usuario")
-            .MustAsync(async (id, ct) => await db.Usuarios.AnyAsync(u => u.Id == id, ct))
+            .MustAsync(async (id, ct) => await db.Usuarios.IgnoreQueryFilters().AnyAsync(u => u.Id == id, ct))
             .WithMessage("No se encontro un usuario con el id informado.");
 
         RuleFor(x => x.IdResponsable)
@@ -66,13 +66,16 @@ public sealed class CreateMantenimientoCommandValidator : AbstractValidator<Crea
 public sealed class CreateMantenimientoCommandHandler : ICommandHandler<CreateMantenimientoCommand, int>
 {
     private readonly IApplicationDbContext _db;
+    private readonly ICurrentUserService _currentUser;
     private readonly IValidator<CreateMantenimientoCommand> _validator;
 
     public CreateMantenimientoCommandHandler(
         IApplicationDbContext db,
+        ICurrentUserService currentUser,
         IValidator<CreateMantenimientoCommand> validator)
     {
         _db = db;
+        _currentUser = currentUser;
         _validator = validator;
     }
 
@@ -80,6 +83,7 @@ public sealed class CreateMantenimientoCommandHandler : ICommandHandler<CreateMa
         CreateMantenimientoCommand command,
         CancellationToken cancellationToken = default)
     {
+        command = command with { IdUsuario = UsuarioSesion.IdQuienEntrega(_currentUser) };
         await _validator.ValidateAndThrowAsync(command, cancellationToken);
 
         var tipo = await TipoAsignacionNombres.ObtenerRequeridoAsync(

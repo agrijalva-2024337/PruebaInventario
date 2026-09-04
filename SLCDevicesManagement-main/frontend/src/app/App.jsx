@@ -25,6 +25,9 @@ import { UsuariosPage } from '@/features/organizacion/usuarios/UsuariosPage';
 import { BitacorasPage } from '@/features/organizacion/bitacoras/BitacorasPage';
 import { ReportesPage } from '@/features/reportes/ReportesPage';
 import { ConsultaActivoPage } from '@/features/consulta/ConsultaActivoPage';
+import { RedesConocidasPage } from '@/features/catalogos/redesConocidas/RedesConocidasPage';
+import { FueraDeRangoPage } from '@/features/rastreo/FueraDeRangoPage';
+import { MapaRastreoPage } from '@/features/rastreo/MapaRastreoPage';
 import { AppLayout } from '@/shared/layout/AppLayout';
 import { PublicLayout } from '@/shared/layout/PublicLayout';
 
@@ -50,6 +53,7 @@ function App() {
           <Route path="/catalogos/bitacora" element={<BitacorasPage />} />
           <Route path="/catalogos/estados" element={<EstadosPage />} />
           <Route path="/catalogos/tipos-asignacion" element={<TiposAsignacionPage />} />
+          <Route path="/catalogos/redes-conocidas" element={<RedesConocidasPage />} />
           <Route path="/activos" element={<ActivosPage />} />
           <Route path="/activos/escanear" element={<EscanearQrPage />} />
           <Route path="/activos/:id" element={<ActivoDetallePage />} />
@@ -59,6 +63,8 @@ function App() {
           <Route path="/operaciones/bajas" element={<BajasPage />} />
           <Route path="/inventario" element={<InventarioPage />} />
           <Route path="/reportes" element={<ReportesPage />} />
+          <Route path="/rastreo/fuera-de-rango" element={<FueraDeRangoPage />} />
+          <Route path="/rastreo/mapa" element={<MapaRastreoPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>
