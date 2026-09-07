@@ -64,6 +64,10 @@ public class ActivoConfiguration : IEntityTypeConfiguration<Activo>
             .HasColumnName("observaciones")
             .HasColumnType("varchar(500)");
 
+        builder.Property(a => a.PerifericosAdicionales)
+            .HasColumnName("perifericos_adicionales")
+            .HasColumnType("varchar(300)");
+
         builder.HasOne(a => a.CategoriaActivo)
             .WithMany()
             .HasForeignKey(a => a.IdCategoriaActivo)

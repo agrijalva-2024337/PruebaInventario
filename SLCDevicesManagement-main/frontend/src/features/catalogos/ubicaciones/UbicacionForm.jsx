@@ -20,6 +20,18 @@ function validateUbicacion(values) {
   enforceMaxLength(errors, values, 'descripcion', 'descripcion', 200);
   enforceRequiredDecimal(errors, values, 'latitud', 'latitud');
   enforceRequiredDecimal(errors, values, 'longitud', 'longitud');
+  const lat = Number(values.latitud);
+  const lng = Number(values.longitud);
+  if (!Number.isNaN(lat) && (lat < -90 || lat > 90)) {
+    errors.latitud = 'La latitud debe estar entre -90 y 90.';
+  }
+  if (!Number.isNaN(lng) && (lng < -180 || lng > 180)) {
+    errors.longitud = 'La longitud debe estar entre -180 y 180.';
+  }
+  if (!Number.isNaN(lat) && !Number.isNaN(lng) && Math.abs(lat) < 0.05 && Math.abs(lng) < 0.05) {
+    errors.latitud = '0, 0 cae en el océano. Usa las coordenadas reales (ej. 14.63, -90.51).';
+    errors.longitud = '0, 0 cae en el océano. Usa las coordenadas reales (ej. 14.63, -90.51).';
+  }
   return errors;
 }
 

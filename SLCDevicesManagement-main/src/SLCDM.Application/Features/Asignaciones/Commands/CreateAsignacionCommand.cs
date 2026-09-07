@@ -104,15 +104,18 @@ public sealed class CreateAsignacionCommandHandler : ICommandHandler<CreateAsign
 {
     private readonly IApplicationDbContext _db;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAsignacionCorreoService _correo;
     private readonly IValidator<CreateAsignacionCommand> _validator;
 
     public CreateAsignacionCommandHandler(
         IApplicationDbContext db,
         ICurrentUserService currentUser,
+        IAsignacionCorreoService correo,
         IValidator<CreateAsignacionCommand> validator)
     {
         _db = db;
         _currentUser = currentUser;
+        _correo = correo;
         _validator = validator;
     }
 
@@ -170,6 +173,8 @@ public sealed class CreateAsignacionCommandHandler : ICommandHandler<CreateAsign
             InformacionNueva = $"Activo {entity.IdActivo} entregado a responsable {entity.IdResponsable} en ubicacion {entity.IdUbicacion}."
         });
         await _db.SaveChangesAsync(cancellationToken);
+
+        await _correo.NotificarResponsableAsync(entity.Id, cancellationToken);
 
         return entity.Id;
     }

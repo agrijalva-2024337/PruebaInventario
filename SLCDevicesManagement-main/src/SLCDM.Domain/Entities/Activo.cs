@@ -57,4 +57,7 @@ public class Activo: SLCDM.Domain.Common.BaseEntity {
 
     [MaxLength(500, ErrorMessage = "El campo observaciones no debe superar los 500 caracteres")]
     public string? Observaciones { get; set; }
+
+    [MaxLength(300, ErrorMessage = "El campo perifericos adicionales no debe superar los 300 caracteres")]
+    public string? PerifericosAdicionales { get; set; }
 }

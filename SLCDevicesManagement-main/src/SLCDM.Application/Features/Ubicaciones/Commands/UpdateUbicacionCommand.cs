@@ -1,6 +1,7 @@
 using FluentValidation;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using SLCDM.Application.Common;
 using SLCDM.Application.Common.Exceptions;
 using SLCDM.Application.Common.Interfaces;
 using SLCDM.Application.Common.Validation;
@@ -40,6 +41,10 @@ public sealed class UpdateUbicacionCommandValidator : AbstractValidator<UpdateUb
 
         RuleFor(x => x.Longitud)
             .InclusiveBetween(-180, 180).WithMessage("El campo longitud debe estar entre -180 y 180.");
+
+        RuleFor(x => x)
+            .Must(cmd => GeoCoords.EsUtilizable(cmd.Latitud, cmd.Longitud))
+            .WithMessage("Latitud 0 y longitud 0 no son validas (caen en el oceano). Usa las coordenadas reales de la sede.");
     }
 }
 
