@@ -19,6 +19,11 @@ builder.Services.Configure<SLCDM.Application.Common.Options.BrandingOptions>(opt
         builder.Environment.ContentRootPath,
         "wwwroot",
         "HojaMembrentadaSLC.pdf");
+    options.ActaTemplatePath = Path.Combine(
+        builder.Environment.ContentRootPath,
+        "wwwroot",
+        "templates",
+        "ActaAsignacion.docx");
 });
 builder.Services.AddSingleton<SLCDM.Application.Common.Interfaces.IEmailSender, SLCDM.Api.Email.SmtpEmailSender>();
 builder.Services.AddJwtAuthentication(builder.Configuration);
