@@ -85,9 +85,9 @@ public sealed class AsignacionPdfService : IAsignacionPdfService
             Marca = Texto(asignacion.Activo?.Marca),
             Modelo = Texto(asignacion.Activo?.Modelo),
             Serie = Texto(asignacion.Activo?.NumeroSerie),
-            Especificaciones = Texto(asignacion.Activo?.Descripcion),
+            Especificaciones = EspecificacionesHardware(asignacion.Activo),
             Perifericos = Texto(asignacion.Activo?.PerifericosAdicionales),
-            Estado = Texto(asignacion.Estado?.Nombre),
+            Estado = Activos.ActivoCondicion.Texto(asignacion.Activo?.Condicion),
             Motivo = string.IsNullOrWhiteSpace(asignacion.Observaciones)
                 ? "—"
                 : asignacion.Observaciones.Trim(),
@@ -118,6 +118,41 @@ public sealed class AsignacionPdfService : IAsignacionPdfService
         };
 
         return names.FirstOrDefault(p => !string.IsNullOrWhiteSpace(p) && File.Exists(p));
+    }
+
+    private static string EspecificacionesHardware(Domain.Entities.Activo? activo)
+    {
+        var specs = activo?.Descripcion?.Trim();
+        if (string.IsNullOrWhiteSpace(specs))
+        {
+            return "—";
+        }
+
+        var clave = QuitarAcentos(specs);
+        if (clave == QuitarAcentos(activo?.CategoriaActivo?.Nombre)
+            || clave == QuitarAcentos(activo?.Nombre))
+        {
+            return "—";
+        }
+
+        return specs;
+    }
+
+    private static string QuitarAcentos(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        return value.Trim()
+            .Replace("á", "a", StringComparison.OrdinalIgnoreCase)
+            .Replace("é", "e", StringComparison.OrdinalIgnoreCase)
+            .Replace("í", "i", StringComparison.OrdinalIgnoreCase)
+            .Replace("ó", "o", StringComparison.OrdinalIgnoreCase)
+            .Replace("ú", "u", StringComparison.OrdinalIgnoreCase)
+            .Replace("ñ", "n", StringComparison.OrdinalIgnoreCase)
+            .ToLowerInvariant();
     }
 
     private static string Texto(string? value) =>

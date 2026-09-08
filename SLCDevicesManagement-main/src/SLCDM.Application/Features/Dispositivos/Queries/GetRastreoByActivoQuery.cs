@@ -21,6 +21,7 @@ public sealed class GetRastreoByActivoQueryHandler
         CancellationToken cancellationToken = default)
     {
         var dto = await _db.DispositivosToken.AsNoTracking()
+            .IgnoreQueryFilters()
             .Where(d => !d.Revocado && d.IdActivo == query.IdActivo)
             .Select(d => new DispositivoRastreoDto(
                 d.IdActivo,

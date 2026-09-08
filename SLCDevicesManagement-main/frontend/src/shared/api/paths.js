@@ -18,6 +18,7 @@ export const apiPaths = {
   tiposAsignacion: '/api/tiposAsignacion',
   categoriasActivo: '/api/categoriasActivo',
   proveedores: '/api/proveedores',
+  productosCompra: '/api/productosCompra',
   ubicaciones: '/api/ubicaciones',
   activos: '/api/activos',
   consultaActivos: '/api/consulta/activos',

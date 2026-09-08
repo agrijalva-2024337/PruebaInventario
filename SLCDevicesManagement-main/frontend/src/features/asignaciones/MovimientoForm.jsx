@@ -5,6 +5,7 @@ import { TextField } from '@/shared/components/TextField';
 import { TextareaField } from '@/shared/components/TextareaField';
 import { useForm } from '@/shared/hooks/useForm';
 import { enforceMaxLength, enforceRequired } from '@/shared/utils/fieldErrors';
+import { estadoOperativo, ESTADO_OPERATIVO } from '@/features/activos/activoEstado';
 
 function idAreaDe(item) {
   const raw = item?.idArea ?? item?.IdArea ?? item?.id_area;
@@ -53,7 +54,7 @@ export function MovimientoForm({
     asignacion:
       'No hay activos disponibles. Un activo ya asignado, en mantenimiento o de baja no aparece en esta lista.',
     traslado:
-      'No hay activos para trasladar. Los que están en mantenimiento o de baja no aparecen.',
+      'No hay activos para trasladar. Los que están en mantenimiento o de baja no aparecen. Si está asignado, el traslado mueve a la misma persona.',
     mantenimiento:
       'No hay activos disponibles para mantenimiento. Debe estar libre (no asignado ni de baja).',
     baja: 'No hay activos para dar de baja. No aparecen los que ya están de baja o en mantenimiento.',
@@ -73,6 +74,15 @@ export function MovimientoForm({
     }
     if (isTraslado) {
       enforceRequired(errors, values, 'observaciones', 'motivo del traslado');
+      const activoEnForma = (activos ?? []).find((item) => Number(item.id) === Number(values.idActivo));
+      if (
+        activoEnForma &&
+        estadoOperativo(activoEnForma) === ESTADO_OPERATIVO.asignado &&
+        Number(values.idResponsable) !== Number(activoEnForma.idResponsable)
+      ) {
+        errors.idResponsable =
+          'Este activo ya está asignado. El traslado debe ser con la misma persona. Para cambiar de responsable, registre primero la devolución.';
+      }
     }
     if (isBaja) {
       enforceRequired(errors, values, 'motivo', 'motivo');
@@ -93,6 +103,8 @@ export function MovimientoForm({
   });
 
   const activoSeleccionado = (activos ?? []).find((item) => Number(item.id) === Number(values.idActivo));
+  const trasladoConAsignacionActiva =
+    isTraslado && estadoOperativo(activoSeleccionado) === ESTADO_OPERATIVO.asignado;
   const areaSeleccionada = values.idArea !== '' && values.idArea != null;
   const habilitados = (responsables ?? []).filter((item) => item.habilitado !== false);
   const responsablesDeArea = areaSeleccionada
@@ -111,7 +123,16 @@ export function MovimientoForm({
         label="Activo"
         name="idActivo"
         value={values.idActivo}
-        onChange={handleChange}
+        onChange={(field) => {
+          handleChange(field);
+          if (!isTraslado) {
+            return;
+          }
+          const siguiente = (activos ?? []).find((item) => Number(item.id) === Number(field.value));
+          if (estadoOperativo(siguiente) === ESTADO_OPERATIVO.asignado && siguiente?.idResponsable) {
+            patchValues({ idActivo: field.value, idResponsable: siguiente.idResponsable });
+          }
+        }}
         onBlur={handleBlur}
         error={touched.idActivo ? errors.idActivo : undefined}
         options={activoOptions}
@@ -125,6 +146,14 @@ export function MovimientoForm({
         <p className="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700">
           Ubicación de origen:{' '}
           <strong>{activoSeleccionado?.nombreUbicacion || activoSeleccionado?.idUbicacion || 'actual del activo'}</strong>
+          {trasladoConAsignacionActiva ? (
+            <>
+              . Asignado a{' '}
+              <strong>{activoSeleccionado?.nombreResponsable || 'la persona actual'}</strong>. El
+              traslado mueve a esa persona a la ubicación destino. Para entregarlo a otra persona,
+              registre primero la devolución.
+            </>
+          ) : null}
         </p>
       ) : null}
       {isAsignacion && areaOptions.length > 0 ? (
@@ -141,7 +170,15 @@ export function MovimientoForm({
         />
       ) : null}
       <SelectField
-        label={isBaja ? 'Autoriza (responsable)' : isAsignacion ? 'Persona del área' : 'Responsable que recibe'}
+        label={
+          isBaja
+            ? 'Autoriza (responsable)'
+            : isAsignacion
+              ? 'Persona del área'
+              : trasladoConAsignacionActiva
+                ? 'Persona asignada (se traslada con el equipo)'
+                : 'Responsable que recibe'
+        }
         name="idResponsable"
         value={values.idResponsable}
         onChange={handleChange}
@@ -149,6 +186,7 @@ export function MovimientoForm({
         error={touched.idResponsable ? errors.idResponsable : undefined}
         options={responsablesVisibles}
         required
+        disabled={trasladoConAsignacionActiva}
         placeholder={
           isAsignacion && areaSeleccionada ? 'Seleccionar persona del área' : 'Seleccionar...'
         }

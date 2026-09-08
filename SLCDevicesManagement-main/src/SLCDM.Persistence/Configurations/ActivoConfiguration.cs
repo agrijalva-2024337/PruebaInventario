@@ -24,7 +24,11 @@ public class ActivoConfiguration : IEntityTypeConfiguration<Activo>
 
         builder.Property(a => a.Descripcion)
             .HasColumnName("descripcion")
-            .HasColumnType("varchar(300)");
+            .HasColumnType("varchar(500)");
+
+        builder.Property(a => a.Condicion)
+            .HasColumnName("condicion")
+            .HasColumnType("varchar(20)");
 
         builder.Property(a => a.Marca)
             .HasColumnName("marca")

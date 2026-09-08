@@ -30,6 +30,7 @@ public interface IApplicationDbContext
     DbSet<TipoAsignacion> TiposAsignacion { get; }
     DbSet<CategoriaActivo> CategoriasActivo { get; }
     DbSet<Proveedor> Proveedores { get; }
+    DbSet<ProductoCompra> ProductosCompra { get; }
     DbSet<Ubicacion> Ubicaciones { get; }
     DbSet<Activo> Activos { get; }
     DbSet<Asignacion> Asignaciones { get; }

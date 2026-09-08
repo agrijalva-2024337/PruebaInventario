@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SLCDM.Application.Common.Exceptions;
 using SLCDM.Application.Common.Interfaces;
 using SLCDM.Application.Common.Validation;
+using SLCDM.Application.Features.Activos;
 
 namespace SLCDM.Application.Features.Activos.Commands;
 
@@ -14,6 +15,7 @@ public sealed record UpdateActivoCommand(
     int IdUbicacion,
     string Nombre,
     string? Descripcion,
+    string? Condicion,
     string? Marca,
     string? Modelo,
     string? NumeroSerie,
@@ -51,8 +53,13 @@ public sealed class UpdateActivoCommandValidator : AbstractValidator<UpdateActiv
             .MaximumLength(150).WithMessage("El campo nombre no debe superar los 150 caracteres.");
 
         RuleFor(x => x.Descripcion)
-            .MaximumLength(300).WithMessage("El campo descripcion no debe superar los 300 caracteres.")
+            .MaximumLength(500).WithMessage("El campo especificaciones de hardware no debe superar los 500 caracteres.")
             .When(x => !string.IsNullOrWhiteSpace(x.Descripcion));
+
+        RuleFor(x => x.Condicion)
+            .Must(ActivoCondicion.EsValida)
+            .WithMessage("El campo condicion debe ser Nuevo, Bueno, Regular o Malo.")
+            .When(x => !string.IsNullOrWhiteSpace(x.Condicion));
 
         RuleFor(x => x.Marca)
             .MaximumLength(100).WithMessage("El campo marca no debe superar los 100 caracteres.")

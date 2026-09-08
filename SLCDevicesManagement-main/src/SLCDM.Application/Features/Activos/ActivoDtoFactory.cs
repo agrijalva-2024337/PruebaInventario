@@ -33,6 +33,7 @@ internal static class ActivoDtoFactory
             item.IdUbicacion,
             item.Nombre,
             item.Descripcion,
+            item.Condicion,
             item.Marca,
             item.Modelo,
             item.NumeroSerie,

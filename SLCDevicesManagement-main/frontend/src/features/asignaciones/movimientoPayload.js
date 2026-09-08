@@ -13,7 +13,7 @@ export const KIND_META = {
   },
   traslado: {
     title: 'Traslados',
-    description: 'Cambio de ubicación. No ocupa el activo.',
+    description: 'Cambio de sede o ubicación de la misma empresa. Si el activo está asignado, la persona se mueve con el equipo. Para entregarlo a otra persona, primero hay que devolverlo.',
     tipoNombre: 'Traslado',
     actionLabel: 'Nuevo traslado',
     submit: asignacionService.trasladar,

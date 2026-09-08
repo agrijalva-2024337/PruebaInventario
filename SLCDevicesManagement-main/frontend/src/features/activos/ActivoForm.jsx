@@ -1,9 +1,12 @@
+import { useEffect, useState } from 'react';
 import { FormActions } from '@/shared/components/FormActions';
 import { SelectField } from '@/shared/components/SelectField';
 import { TextField } from '@/shared/components/TextField';
 import { TextareaField } from '@/shared/components/TextareaField';
 import { useForm } from '@/shared/hooks/useForm';
 import { enforceMaxLength, enforceRequired } from '@/shared/utils/fieldErrors';
+import { toDateInput } from '@/shared/utils/dates';
+import * as productoCompraService from '@/features/catalogos/productosCompra/productoCompraService';
 
 function validateActivo(values) {
   const errors = {};
@@ -12,7 +15,9 @@ function validateActivo(values) {
   enforceRequired(errors, values, 'idUbicacion', 'id ubicacion');
   enforceRequired(errors, values, 'nombre', 'nombre');
   enforceMaxLength(errors, values, 'nombre', 'nombre', 150);
-  enforceMaxLength(errors, values, 'descripcion', 'descripcion', 300);
+  enforceRequired(errors, values, 'condicion', 'condicion');
+  enforceMaxLength(errors, values, 'descripcion', 'especificaciones de hardware', 500);
+  enforceMaxLength(errors, values, 'perifericosAdicionales', 'perifericos adicionales', 300);
   enforceMaxLength(errors, values, 'marca', 'marca', 100);
   enforceMaxLength(errors, values, 'modelo', 'modelo', 100);
   enforceMaxLength(errors, values, 'numeroSerie', 'numero serie', 100);
@@ -36,23 +41,64 @@ export function ActivoForm({
   onCancel,
   isSubmitting,
 }) {
-  const { values, errors, touched, handleChange, handleBlur, handleSubmit } = useForm({
+  const { values, errors, touched, handleChange, handleBlur, handleSubmit, patchValues } = useForm({
     initialValues,
     validate: validateActivo,
   });
+  const [productos, setProductos] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const idProveedor = Number(values.idProveedor);
+    if (!Number.isInteger(idProveedor) || idProveedor <= 0) {
+      setProductos([]);
+      return undefined;
+    }
+
+    productoCompraService
+      .getAll({ idProveedor })
+      .then((rows) => {
+        if (!cancelled) {
+          setProductos((rows ?? []).filter((item) => item.habilitado !== false));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProductos([]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [values.idProveedor]);
+
+  function aplicarProducto(idProducto) {
+    const producto = productos.find((item) => Number(item.id) === Number(idProducto));
+    if (!producto) {
+      patchValues({ idProductoCompra: idProducto || '' });
+      return;
+    }
+
+    patchValues({
+      idProductoCompra: producto.id,
+      nombre: producto.nombre || values.nombre,
+      marca: producto.marca || '',
+      modelo: producto.modelo || '',
+      descripcion: producto.descripcion || values.descripcion,
+      costoAdquisicion: producto.costoUnitario ?? values.costoAdquisicion,
+      moneda: producto.moneda || values.moneda || 'GTQ',
+      numeroFactura: producto.numeroFactura || '',
+      fechaCompra: toDateInput(producto.fechaCompra) || values.fechaCompra,
+      fechaVencimientoGarantia:
+        toDateInput(producto.fechaVencimientoGarantia) || values.fechaVencimientoGarantia,
+      idCategoriaActivo: producto.idCategoriaActivo || values.idCategoriaActivo,
+    });
+  }
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-      <TextField
-        label="Nombre"
-        name="nombre"
-        value={values.nombre}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        error={touched.nombre ? errors.nombre : undefined}
-        required
-      />
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <SelectField
           label="Categoría"
           name="idCategoriaActivo"
@@ -67,11 +113,35 @@ export function ActivoForm({
           label="Proveedor"
           name="idProveedor"
           value={values.idProveedor}
-          onChange={handleChange}
+          onChange={(field) => {
+            handleChange(field);
+            patchValues({ idProveedor: field.value, idProductoCompra: '' });
+          }}
           onBlur={handleBlur}
           error={touched.idProveedor ? errors.idProveedor : undefined}
           options={proveedorOptions}
           required
+        />
+        <SelectField
+          label="Producto de esa compra"
+          name="idProductoCompra"
+          value={values.idProductoCompra}
+          onChange={(field) => aplicarProducto(field.value)}
+          onBlur={handleBlur}
+          options={productos.map((item) => ({
+            value: item.id,
+            label: [item.nombre, item.marca, item.modelo, item.numeroFactura]
+              .filter(Boolean)
+              .join(' · '),
+          }))}
+          placeholder={
+            values.idProveedor
+              ? productos.length
+                ? 'Seleccionar producto...'
+                : 'Este proveedor no tiene productos cargados'
+              : 'Elija primero el proveedor'
+          }
+          disabled={!values.idProveedor}
         />
         <SelectField
           label="Ubicación"
@@ -84,7 +154,22 @@ export function ActivoForm({
           required
         />
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
+      {values.idProveedor && productos.length === 0 ? (
+        <p className="text-sm text-slate-500">
+          Cargue el stock de este proveedor en Organización → Productos de compra para rellenar
+          marca, modelo, factura y fechas.
+        </p>
+      ) : null}
+      <TextField
+        label="Nombre"
+        name="nombre"
+        value={values.nombre}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        error={touched.nombre ? errors.nombre : undefined}
+        required
+      />
+      <div className="grid gap-4 sm:grid-cols-2">
         <TextField
           label="Marca"
           name="marca"
@@ -108,6 +193,21 @@ export function ActivoForm({
           onChange={handleChange}
           onBlur={handleBlur}
           error={touched.numeroSerie ? errors.numeroSerie : undefined}
+        />
+        <SelectField
+          label="Estado físico"
+          name="condicion"
+          value={values.condicion}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={touched.condicion ? errors.condicion : undefined}
+          options={[
+            { value: 'Nuevo', label: 'Nuevo' },
+            { value: 'Bueno', label: 'Bueno' },
+            { value: 'Regular', label: 'Regular' },
+            { value: 'Malo', label: 'Malo' },
+          ]}
+          required
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -164,12 +264,21 @@ export function ActivoForm({
         />
       </div>
       <TextareaField
-        label="Descripción"
+        label="Especificaciones de hardware"
         name="descripcion"
         value={values.descripcion}
         onChange={handleChange}
         onBlur={handleBlur}
         error={touched.descripcion ? errors.descripcion : undefined}
+        placeholder="RAM 16 GB, SSD 512 GB, Intel Core i5-1235U, pantalla 14 pulgadas"
+      />
+      <TextareaField
+        label="Periféricos adicionales"
+        name="perifericosAdicionales"
+        value={values.perifericosAdicionales}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        error={touched.perifericosAdicionales ? errors.perifericosAdicionales : undefined}
       />
       <TextareaField
         label="Observaciones"

@@ -35,9 +35,14 @@ namespace SLCDM.Persistence.Migrations
                         .HasColumnType("decimal(12,2)")
                         .HasColumnName("costo_adquisicion");
 
+                    b.Property<string>("Condicion")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("condicion");
+
                     b.Property<string>("Descripcion")
-                        .HasMaxLength(300)
-                        .HasColumnType("varchar(300)")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
                         .HasColumnName("descripcion");
 
                     b.Property<DateTime>("FechaCompra")
@@ -661,6 +666,81 @@ namespace SLCDM.Persistence.Migrations
                     b.ToTable("pais", (string)null);
                 });
 
+            modelBuilder.Entity("SLCDM.Domain.Entities.ProductoCompra", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id_producto_compra");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CostoUnitario")
+                        .HasColumnType("decimal(12,2)")
+                        .HasColumnName("costo_unitario");
+
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("descripcion");
+
+                    b.Property<DateTime>("FechaCompra")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha_compra");
+
+                    b.Property<DateTime>("FechaVencimientoGarantia")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha_vencimiento_garantia");
+
+                    b.Property<bool>("Habilitado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("habilitado");
+
+                    b.Property<int?>("IdCategoriaActivo")
+                        .HasColumnType("int")
+                        .HasColumnName("id_categoria");
+
+                    b.Property<int>("IdProveedor")
+                        .HasColumnType("int")
+                        .HasColumnName("id_proveedor");
+
+                    b.Property<string>("Marca")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("marca");
+
+                    b.Property<string>("Modelo")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("modelo");
+
+                    b.Property<string>("Moneda")
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("moneda");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("nombre");
+
+                    b.Property<string>("NumeroFactura")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("numero_factura");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdCategoriaActivo");
+
+                    b.HasIndex("IdProveedor");
+
+                    b.ToTable("producto_compra", (string)null);
+                });
+
             modelBuilder.Entity("SLCDM.Domain.Entities.Proveedor", b =>
                 {
                     b.Property<int>("Id")
@@ -1152,6 +1232,24 @@ namespace SLCDM.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Sede");
+                });
+
+            modelBuilder.Entity("SLCDM.Domain.Entities.ProductoCompra", b =>
+                {
+                    b.HasOne("SLCDM.Domain.Entities.CategoriaActivo", "CategoriaActivo")
+                        .WithMany()
+                        .HasForeignKey("IdCategoriaActivo")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SLCDM.Domain.Entities.Proveedor", "Proveedor")
+                        .WithMany()
+                        .HasForeignKey("IdProveedor")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CategoriaActivo");
+
+                    b.Navigation("Proveedor");
                 });
 
             modelBuilder.Entity("SLCDM.Domain.Entities.Proveedor", b =>

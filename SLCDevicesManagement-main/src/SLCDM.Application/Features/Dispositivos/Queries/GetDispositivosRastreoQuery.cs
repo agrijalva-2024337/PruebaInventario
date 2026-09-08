@@ -23,18 +23,31 @@ public sealed class GetDispositivosRastreoQueryHandler
     : IQueryHandler<GetDispositivosRastreoQuery, IReadOnlyList<DispositivoRastreoDto>>
 {
     private readonly IApplicationDbContext _db;
+    private readonly ICurrentUserService _currentUser;
 
-    public GetDispositivosRastreoQueryHandler(IApplicationDbContext db)
+    public GetDispositivosRastreoQueryHandler(IApplicationDbContext db, ICurrentUserService currentUser)
     {
         _db = db;
+        _currentUser = currentUser;
     }
 
     public async Task<IReadOnlyList<DispositivoRastreoDto>> HandleAsync(
         GetDispositivosRastreoQuery query,
         CancellationToken cancellationToken = default)
     {
-        return await _db.DispositivosToken.AsNoTracking()
-            .Where(d => !d.Revocado)
+        var items = _db.DispositivosToken
+            .AsNoTracking()
+            .IgnoreQueryFilters()
+            .Where(d => !d.Revocado && d.Activo != null);
+
+        if (!_currentUser.IsAdministradorGeneral && _currentUser.EmpresaId is int idEmpresa)
+        {
+            items = items.Where(d =>
+                _db.Proveedores.IgnoreQueryFilters().Any(p =>
+                    p.Id == d.Activo!.IdProveedor && p.IdEmpresa == idEmpresa));
+        }
+
+        return await items
             .Select(d => new DispositivoRastreoDto(
                 d.IdActivo,
                 d.Activo!.Nombre,

@@ -241,6 +241,14 @@ export function ActivoDetallePage() {
                 </dd>
               </div>
               <div>
+                <dt className="text-xs uppercase tracking-wide text-slate-500">Estado físico</dt>
+                <dd>{activo.condicion || '—'}</dd>
+              </div>
+              <div className="sm:col-span-2">
+                <dt className="text-xs uppercase tracking-wide text-slate-500">Especificaciones de hardware</dt>
+                <dd>{activo.descripcion || '—'}</dd>
+              </div>
+              <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-500">Compra</dt>
                 <dd>
                   {formatDate(activo.fechaCompra)} · {activo.moneda} {activo.costoAdquisicion}
@@ -373,7 +381,11 @@ export function ActivoDetallePage() {
           <MovimientoForm
             key={movimientoKind}
             kind={movimientoKind}
-            initialValues={emptyMovimientoForm(activoId)}
+            initialValues={{
+              ...emptyMovimientoForm(activoId),
+              idResponsable:
+                movimientoKind === 'traslado' && activo?.idResponsable ? activo.idResponsable : '',
+            }}
             activoOptions={toOptions(activo ? [activo] : [])}
             responsableOptions={toOptions(lookups.responsables, 'nombreCompleto')}
             ubicacionOptions={toOptions(lookups.ubicaciones)}

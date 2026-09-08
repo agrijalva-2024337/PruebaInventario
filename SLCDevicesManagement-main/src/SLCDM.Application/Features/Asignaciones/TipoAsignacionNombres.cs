@@ -11,14 +11,15 @@ namespace SLCDM.Application.Features.Asignaciones;
 /// crearlos como AdministradorGeneral. Si falta el registro, BE-16/17/18
 /// (<see cref="ObtenerRequeridoAsync"/>) responden 409.
 /// Solo Asignacion y Mantenimiento ocupan el activo (un proceso a la vez).
-/// Traslado no ocupa; Baja bloquea entrega/traslado/mantenimiento.
+/// Traslado no ocupa: si hay entrega activa, mueve a la misma persona de ubicacion.
+/// Cambiar de persona exige devolucion previa. Baja bloquea entrega/traslado/mantenimiento.
 /// </summary>
 public static class TipoAsignacionNombres
 {
     /// <summary>Entrega a responsable. Ocupa el activo. BE-14/15.</summary>
     public const string Asignacion = "Asignacion";
 
-    /// <summary>Cambio de ubicacion. No ocupa. BE-16.</summary>
+    /// <summary>Cambio de ubicacion. No ocupa. Si hay asignacion activa, la persona se mueve con el activo. BE-16.</summary>
     public const string Traslado = "Traslado";
 
     /// <summary>Envio a mantenimiento. Ocupa el activo. BE-17.</summary>

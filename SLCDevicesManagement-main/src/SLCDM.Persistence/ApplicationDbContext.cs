@@ -40,6 +40,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<TipoAsignacion> TiposAsignacion => Set<TipoAsignacion>();
     public DbSet<CategoriaActivo> CategoriasActivo => Set<CategoriaActivo>();
     public DbSet<Proveedor> Proveedores => Set<Proveedor>();
+    public DbSet<ProductoCompra> ProductosCompra => Set<ProductoCompra>();
     public DbSet<Ubicacion> Ubicaciones => Set<Ubicacion>();
     public DbSet<Activo> Activos => Set<Activo>();
     public DbSet<Asignacion> Asignaciones => Set<Asignacion>();
@@ -73,6 +74,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
         modelBuilder.Entity<Proveedor>().HasQueryFilter(p =>
             IgnoreEmpresaFilter || p.IdEmpresa == TenantEmpresaId);
+
+        modelBuilder.Entity<ProductoCompra>().HasQueryFilter(p =>
+            IgnoreEmpresaFilter || Proveedores.Any(x => x.Id == p.IdProveedor));
 
         modelBuilder.Entity<Area>().HasQueryFilter(a =>
             IgnoreEmpresaFilter || Sedes.Any(s => s.Id == a.IdSede));

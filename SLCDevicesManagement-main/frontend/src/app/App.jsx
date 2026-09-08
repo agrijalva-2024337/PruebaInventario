@@ -14,6 +14,7 @@ import { LoginPage } from '@/features/auth/LoginPage';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { CategoriasPage } from '@/features/catalogos/categorias/CategoriasPage';
 import { ProveedoresPage } from '@/features/catalogos/proveedores/ProveedoresPage';
+import { ProductosCompraPage } from '@/features/catalogos/productosCompra/ProductosCompraPage';
 import { UbicacionesPage } from '@/features/catalogos/ubicaciones/UbicacionesPage';
 import { InventarioPage } from '@/features/inventario/InventarioPage';
 import { AreasPage } from '@/features/organizacion/areas/AreasPage';
@@ -48,6 +49,7 @@ function App() {
           <Route path="/catalogos/responsables" element={<ResponsablesPage />} />
           <Route path="/catalogos/categorias" element={<CategoriasPage />} />
           <Route path="/catalogos/proveedores" element={<ProveedoresPage />} />
+          <Route path="/catalogos/productos-compra" element={<ProductosCompraPage />} />
           <Route path="/catalogos/ubicaciones" element={<UbicacionesPage />} />
           <Route path="/catalogos/usuarios" element={<UsuariosPage />} />
           <Route path="/catalogos/bitacora" element={<BitacorasPage />} />

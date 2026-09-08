@@ -33,6 +33,7 @@ export const NAV_SECTIONS = [
       { to: '/catalogos/ubicaciones', label: 'Ubicaciones' },
       { to: '/catalogos/responsables', label: 'Responsables' },
       { to: '/catalogos/proveedores', label: 'Proveedores' },
+      { to: '/catalogos/productos-compra', label: 'Productos de compra' },
     ],
   },
   {
