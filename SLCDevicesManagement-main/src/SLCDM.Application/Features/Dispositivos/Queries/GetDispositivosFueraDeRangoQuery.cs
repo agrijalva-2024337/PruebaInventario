@@ -20,19 +20,30 @@ public sealed class GetDispositivosFueraDeRangoQueryHandler
     : IQueryHandler<GetDispositivosFueraDeRangoQuery, IReadOnlyList<DispositivoFueraDeRangoDto>>
 {
     private readonly IApplicationDbContext _db;
+    private readonly ICurrentUserService _currentUser;
 
-    public GetDispositivosFueraDeRangoQueryHandler(IApplicationDbContext db)
+    public GetDispositivosFueraDeRangoQueryHandler(IApplicationDbContext db, ICurrentUserService currentUser)
     {
         _db = db;
+        _currentUser = currentUser;
     }
 
     public async Task<IReadOnlyList<DispositivoFueraDeRangoDto>> HandleAsync(
         GetDispositivosFueraDeRangoQuery query,
         CancellationToken cancellationToken = default)
     {
-        var items = await _db.DispositivosToken.AsNoTracking()
-            .Where(d => d.FueraDeRango && !d.Revocado)
-            .Include(d => d.Activo)
+        var items = _db.DispositivosToken.AsNoTracking()
+            .IgnoreQueryFilters()
+            .Where(d => d.FueraDeRango && !d.Revocado && d.Activo != null);
+
+        if (!_currentUser.IsAdministradorGeneral && _currentUser.EmpresaId is int idEmpresa)
+        {
+            items = items.Where(d =>
+                _db.Proveedores.IgnoreQueryFilters().Any(p =>
+                    p.Id == d.Activo!.IdProveedor && p.IdEmpresa == idEmpresa));
+        }
+
+        return await items
             .Select(d => new DispositivoFueraDeRangoDto(
                 d.IdActivo,
                 d.Activo!.Nombre,
@@ -44,7 +55,5 @@ public sealed class GetDispositivosFueraDeRangoQueryHandler
                 d.UltimaLatitud,
                 d.UltimaLongitud))
             .ToListAsync(cancellationToken);
-
-        return items;
     }
 }

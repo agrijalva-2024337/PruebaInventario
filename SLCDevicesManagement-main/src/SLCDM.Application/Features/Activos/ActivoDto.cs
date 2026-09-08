@@ -7,6 +7,7 @@ public sealed record ActivoDto(
     int IdUbicacion,
     string Nombre,
     string? Descripcion,
+    string? Condicion,
     string? Marca,
     string? Modelo,
     string? NumeroSerie,

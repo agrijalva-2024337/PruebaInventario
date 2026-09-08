@@ -77,47 +77,6 @@ public sealed class AsignacionPdfService : IAsignacionPdfService
         }
 
         var datos = new ActaWordDatos
-        {
-            Para = quienRecibe,
-            Departamento = string.IsNullOrWhiteSpace(areaNombre) ? "—" : areaNombre,
-            Fecha = asignacion.FechaAsignacion.ToString("dd/MM/yyyy"),
-            TipoEquipo = Texto(asignacion.Activo?.CategoriaActivo?.Nombre ?? asignacion.Activo?.Nombre),
-            Marca = Texto(asignacion.Activo?.Marca),
-            Modelo = Texto(asignacion.Activo?.Modelo),
-            Serie = Texto(asignacion.Activo?.NumeroSerie),
-            Especificaciones = Texto(asignacion.Activo?.Descripcion),
-            Perifericos = Texto(asignacion.Activo?.PerifericosAdicionales),
-            Estado = Texto(asignacion.Estado?.Nombre),
-            Motivo = string.IsNullOrWhiteSpace(asignacion.Observaciones)
-                ? "—"
-                : asignacion.Observaciones.Trim(),
-            NombreResponsable = quienRecibe,
-            Dpi = asignacion.Responsable?.Dpi ?? string.Empty,
-            NombreEntrega = quienEntrega,
-            CargoEntrega = usuarioEntrega is null ? "—" : CargoRol(usuarioEntrega.Rol),
-            NombreRecibe = quienRecibe,
-            CargoRecibe = string.IsNullOrWhiteSpace(asignacion.Responsable?.Cargo)
-                ? "Quien recibe"
-                : asignacion.Responsable!.Cargo.Trim(),
-            FirmaEntrega = asignacion.FirmaEntrega,
-            FirmaRecibe = asignacion.FirmaRecibe
-        };
-
-        var docx = ActaWordDocumento.Rellenar(await File.ReadAllBytesAsync(plantillaPath, cancellationToken), datos);
-        var pdf = await Task.Run(() => DocxPdfConverter.Convertir(docx), cancellationToken);
-        return new AsignacionPdfFileDto(pdf, fileName);
-    }
-
-    private string? ResolverPlantilla()
-    {
-        var names = new[]
-        {
-            _branding.ActaTemplatePath,
-            Path.Combine(AppContext.BaseDirectory, "wwwroot", "templates", "ActaAsignacion.docx"),
-            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "templates", "ActaAsignacion.docx"),
-        };
-
-        return names.FirstOrDefault(p => !string.IsNullOrWhiteSpace(p) && File.Exists(p));
     }
 
     private static string Texto(string? value) =>

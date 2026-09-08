@@ -8,9 +8,11 @@ using SLCDM.Domain.Entities;
 namespace SLCDM.Application.Features.Asignaciones.Commands;
 
 /// <summary>
-/// Traslado interno (BE-16): asignacion con tipo "Traslado",
+/// Traslado interno (BE-16): asignacion con tipo "Traslado" (cerrada, historial),
 /// actualiza <c>activo.id_ubicacion</c> y deja rastro en <c>historial_activo</c>.
-/// No se permiten traslados entre empresas distintas.
+/// Si el activo tiene una entrega activa, la persona se traslada con el equipo
+/// (se actualiza la ubicacion de esa asignacion). No se cambia de responsable
+/// ni se permite una segunda asignacion activa. No hay traslados entre empresas.
 /// </summary>
 public sealed record CreateTrasladoCommand(
     int IdActivo,
@@ -109,7 +111,15 @@ public sealed class CreateTrasladoCommandHandler : ICommandHandler<CreateTraslad
             throw new ConflictException("El activo esta en mantenimiento. Finalice el mantenimiento antes de trasladarlo.");
         }
 
+        var entregaActiva = await AsignacionActivaRules.ObtenerEntregaActivaAsync(
+            _db, command.IdActivo, cancellationToken);
+        if (entregaActiva is not null && entregaActiva.IdResponsable != command.IdResponsable)
+        {
+            throw new ConflictException(AsignacionActivaRules.MensajeTrasladoOtraPersona);
+        }
+
         var idUbicacionAnterior = activo.IdUbicacion;
+        var idUbicacionAsignacionAnterior = entregaActiva?.IdUbicacion;
         var fecha = command.FechaAsignacion == default ? DateTime.UtcNow : command.FechaAsignacion;
         var estado = await EstadoNombres.ObtenerParaTipoAsync(_db, tipo.Nombre, cancellationToken);
 
@@ -129,6 +139,10 @@ public sealed class CreateTrasladoCommandHandler : ICommandHandler<CreateTraslad
 
         _db.Asignaciones.Add(entity);
         activo.IdUbicacion = command.IdUbicacion;
+        if (entregaActiva is not null)
+        {
+            entregaActiva.IdUbicacion = command.IdUbicacion;
+        }
         await _db.SaveChangesAsync(cancellationToken);
 
         _db.HistorialActivos.Add(new HistorialActivo
@@ -137,9 +151,10 @@ public sealed class CreateTrasladoCommandHandler : ICommandHandler<CreateTraslad
             FechaHora = DateTime.UtcNow,
             TipoOperacion = "Traslado",
             Descripcion = "Traslado de activo",
-            InformacionAnterior = $"id_ubicacion={idUbicacionAnterior}",
+            InformacionAnterior =
+                $"id_ubicacion={idUbicacionAnterior}; id_ubicacion_asignacion={idUbicacionAsignacionAnterior}; id_responsable={entregaActiva?.IdResponsable}",
             InformacionNueva =
-                $"id_ubicacion={command.IdUbicacion}; id_activo={command.IdActivo}; motivo={command.Observaciones}; id_responsable={command.IdResponsable}"
+                $"id_ubicacion={command.IdUbicacion}; id_activo={command.IdActivo}; motivo={command.Observaciones}; id_responsable={command.IdResponsable}; asignacion_activa_id={entregaActiva?.Id}"
         });
         await _db.SaveChangesAsync(cancellationToken);
 

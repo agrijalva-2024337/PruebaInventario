@@ -70,7 +70,7 @@ public sealed class RegistrarUbicacionCommandHandler : ICommandHandler<Registrar
             token.UltimaLongitud = ubicacionDetectada.Longitud;
             token.OrigenCoordenada = "wifi";
         }
-        else
+        else if (!GeoCoords.EsUtilizable(token.UltimaLatitud, token.UltimaLongitud))
         {
             token.UltimaLatitud = null;
             token.UltimaLongitud = null;

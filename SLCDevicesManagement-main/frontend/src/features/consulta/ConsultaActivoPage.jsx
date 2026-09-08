@@ -88,7 +88,7 @@ export function ConsultaActivoPage() {
           />
           {activo.descripcion ? (
             <div className="sm:col-span-2">
-              <dt className="text-xs uppercase tracking-wide text-slate-500">Descripción</dt>
+              <dt className="text-xs uppercase tracking-wide text-slate-500">Especificaciones de hardware</dt>
               <dd className="mt-0.5 text-sm text-slate-900">{activo.descripcion}</dd>
             </div>
           ) : null}

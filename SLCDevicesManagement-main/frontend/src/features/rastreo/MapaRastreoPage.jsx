@@ -55,7 +55,24 @@ function puntoVisible(row) {
     };
   }
 
+  const assignedLat = toNumber(row.ubicacionAsignada?.latitud);
+  const assignedLng = toNumber(row.ubicacionAsignada?.longitud);
+  if (esCoordUtil(assignedLat, assignedLng)) {
+    return {
+      lat: assignedLat,
+      lng: assignedLng,
+      etiqueta: `${row.ubicacionAsignada.nombre} (sin GPS; referencia asignada)`,
+      origen: 'asignada',
+    };
+  }
+
   return null;
+}
+
+function colorEstado(fueraDeRango) {
+  return fueraDeRango
+    ? { stroke: '#b91c1c', fill: '#ef4444' }
+    : { stroke: '#15803d', fill: '#22c55e' };
 }
 
 function loadGoogleMaps(apiKey) {
@@ -122,7 +139,8 @@ export function MapaRastreoPage() {
     () =>
       rows
         .map((row) => ({ row, punto: puntoVisible(row) }))
-        .filter((item) => item.punto),
+        .filter((item) => item.punto)
+        .sort((a, b) => Number(a.row.fueraDeRango) - Number(b.row.fueraDeRango)),
     [rows],
   );
 
@@ -158,10 +176,19 @@ export function MapaRastreoPage() {
         puntos.forEach(({ row, punto }) => {
           const position = { lat: punto.lat, lng: punto.lng };
           bounds.extend(position);
+          const colores = colorEstado(row.fueraDeRango);
           const marker = new maps.Marker({
             map,
             position,
-            title: row.nombreActivo,
+            title: `${row.nombreActivo} (${row.fueraDeRango ? 'Fuera de rango' : 'En ubicación'})`,
+            icon: {
+              path: maps.SymbolPath.CIRCLE,
+              scale: 10,
+              fillColor: colores.fill,
+              fillOpacity: 0.95,
+              strokeColor: colores.stroke,
+              strokeWeight: 2,
+            },
           });
           const info = new maps.InfoWindow({
             content: `<strong>${row.nombreActivo}</strong><br/>${punto.etiqueta}<br/>${
@@ -171,7 +198,10 @@ export function MapaRastreoPage() {
           marker.addListener('click', () => info.open({ map, anchor: marker }));
         });
 
-        if (puntos.length > 1) {
+        if (puntos.length === 1) {
+          map.setCenter(center);
+          map.setZoom(12);
+        } else {
           map.fitBounds(bounds, 48);
         }
 
@@ -212,8 +242,8 @@ export function MapaRastreoPage() {
           );
       });
 
-      if (bounds.length > 1) {
-        map.fitBounds(bounds, { padding: [40, 40] });
+      if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
       }
 
       mapCleanupRef.current = () => {
@@ -240,8 +270,8 @@ export function MapaRastreoPage() {
         title="Mapa de equipos"
         description={
           env.googleMapsApiKey
-            ? 'El pin es la última posición real del equipo (GPS usable o red Wi-Fi catalogada). No se usa 0,0 ni la sede asignada como si el equipo estuviera ahí. El mapa usa Google Maps.'
-            : 'El pin es la última posición real del equipo (GPS usable o red Wi-Fi catalogada). No se usa 0,0 ni la sede asignada como si el equipo estuviera ahí. OpenStreetMap (sin API key).'
+            ? 'Se muestran todos los equipos con ping, estén o no en la ubicación asignada. Rojo = fuera de rango, verde = en ubicación. El mapa se ajusta para verlos todos.'
+            : 'Se muestran todos los equipos con ping, estén o no en la ubicación asignada. Rojo = fuera de rango, verde = en ubicación. OpenStreetMap (sin API key).'
         }
       />
 
@@ -257,7 +287,7 @@ export function MapaRastreoPage() {
 
       {!isLoading && puntos.length === 0 ? (
         <p className="text-sm text-slate-500">
-          No hay equipos con coordenadas. El agente debe enviar un ping, o catalogá el BSSID y
+          No hay equipos para pintar. El agente debe enviar un ping, o catalogá el BSSID y
           asegurate de que la ubicación tenga latitud y longitud.
         </p>
       ) : (

@@ -96,8 +96,7 @@ internal static class ActaWordDocumento
                     _ when etiqueta == "marca" || etiqueta.StartsWith("marca") => datos.Marca,
                     _ when etiqueta.Contains("modelo") => datos.Modelo,
                     _ when etiqueta.Contains("serie") => datos.Serie,
-                    _ when etiqueta.Contains("especificacion") => datos.Especificaciones,
-                    _ when etiqueta.Contains("perif") => datos.Perifericos,
+ta.Contains("perif") => datos.Perifericos,
                     _ when etiqueta.Contains("estado") => datos.Estado,
                     _ when etiqueta.Contains("motivo") => datos.Motivo,
                     _ => null
@@ -112,21 +111,24 @@ internal static class ActaWordDocumento
     }
 
     private static void RellenarYoDpi(Body body, string nombre, string dpi)
-    {
+
+        var dpiTexto = string.IsNullOrWhiteSpace(dpi) ? "________________" : dpi.Trim();
+
         foreach (var p in body.Descendants<Paragraph>())
         {
             var texto = Texto(p);
-            if (!texto.Contains("Yo:", StringComparison.OrdinalIgnoreCase)
-                || !texto.Contains("DPI", StringComparison.OrdinalIgnoreCase))
+            var tieneYo = texto.Contains("Yo:", StringComparison.OrdinalIgnoreCase)
+                          || texto.StartsWith("Yo", StringComparison.OrdinalIgnoreCase);
+            var tieneDpi = texto.Contains("DPI", StringComparison.OrdinalIgnoreCase);
+            if (!tieneYo && !tieneDpi)
+
             {
                 continue;
             }
 
             var idx = texto.IndexOf("Acepto", StringComparison.OrdinalIgnoreCase);
             var resto = idx >= 0 ? texto[idx..].Trim() : string.Empty;
-            var dpiTexto = string.IsNullOrWhiteSpace(dpi) ? "________________" : dpi.Trim();
-            SetTexto(p, $"Yo: {nombre}     DPI: {dpiTexto}  {resto}");
-            return;
+
         }
     }
 

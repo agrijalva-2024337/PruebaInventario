@@ -26,8 +26,11 @@ public class Activo: SLCDM.Domain.Common.BaseEntity {
     [MaxLength(150, ErrorMessage = "El campo nombre no debe superar los 150 caracteres")]
     public string Nombre { get; set; } = string.Empty;
 
-    [MaxLength(300, ErrorMessage = "El campo descripcion no debe superar los 300 caracteres")]
+    [MaxLength(500, ErrorMessage = "El campo descripcion no debe superar los 500 caracteres")]
     public string? Descripcion { get; set; }
+
+    [MaxLength(20, ErrorMessage = "El campo condicion no debe superar los 20 caracteres")]
+    public string? Condicion { get; set; }
 
     [MaxLength(100, ErrorMessage = "El campo marca no debe superar los 100 caracteres")]
     public string? Marca { get; set; }

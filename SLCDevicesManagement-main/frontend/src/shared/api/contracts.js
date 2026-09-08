@@ -139,6 +139,7 @@
  * @property {number | null} idUbicacion
  * @property {string} nombre
  * @property {string | null} descripcion
+ * @property {string | null} [condicion]
  * @property {string | null} marca
  * @property {string | null} modelo
  * @property {string | null} numeroSerie
