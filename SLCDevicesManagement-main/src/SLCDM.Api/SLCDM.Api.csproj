@@ -25,4 +25,8 @@
     <ProjectReference Include="..\SLCDM.Persistence\SLCDM.Persistence.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\templates\ActaAsignacion.docx" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

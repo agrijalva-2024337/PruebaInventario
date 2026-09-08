@@ -8,7 +8,12 @@ function validateResponsable(values) {
   const errors = {};
   enforceRequired(errors, values, 'idArea', 'id area');
   enforceRequired(errors, values, 'nombreCompleto', 'nombre completo');
+  enforceRequired(errors, values, 'dpi', 'DPI');
   enforceMaxLength(errors, values, 'nombreCompleto', 'nombre completo', 150);
+  enforceMaxLength(errors, values, 'dpi', 'DPI', 13);
+  if (values.dpi && !/^\d{13}$/.test(String(values.dpi).trim())) {
+    errors.dpi = 'El campo DPI debe tener 13 dígitos';
+  }
   enforceMaxLength(errors, values, 'cargo', 'cargo', 100);
   enforceMaxLength(errors, values, 'correo', 'correo', 150);
   enforceMaxLength(errors, values, 'telefono', 'telefono', 30);
@@ -41,6 +46,17 @@ export function ResponsableForm({ initialValues, areaOptions, onSubmit, onCancel
         onBlur={handleBlur}
         error={touched.nombreCompleto ? errors.nombreCompleto : undefined}
         required
+      />
+      <TextField
+        label="DPI"
+        name="dpi"
+        value={values.dpi}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        error={touched.dpi ? errors.dpi : undefined}
+        required
+        maxLength={13}
+        inputMode="numeric"
       />
       <TextField
         label="Cargo"

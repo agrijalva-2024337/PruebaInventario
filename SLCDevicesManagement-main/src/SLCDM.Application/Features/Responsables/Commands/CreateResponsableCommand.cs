@@ -10,6 +10,7 @@ namespace SLCDM.Application.Features.Responsables.Commands;
 public sealed record CreateResponsableCommand(
     int IdArea,
     string NombreCompleto,
+    string Dpi,
     string? Cargo,
     string? Correo,
     string? Telefono);
@@ -26,6 +27,10 @@ public sealed class CreateResponsableCommandValidator : AbstractValidator<Create
         RuleFor(x => x.NombreCompleto)
             .NotEmpty().WithMessage("El campo nombre completo es obligatorio.")
             .MaximumLength(150).WithMessage("El campo nombre completo no debe superar los 150 caracteres.");
+
+        RuleFor(x => x.Dpi)
+            .NotEmpty().WithMessage("El campo DPI es obligatorio.")
+            .Matches(@"^\d{13}$").WithMessage("El campo DPI debe tener 13 dígitos.");
 
         RuleFor(x => x.Cargo)
             .MaximumLength(100).WithMessage("El campo cargo no debe superar los 100 caracteres.")

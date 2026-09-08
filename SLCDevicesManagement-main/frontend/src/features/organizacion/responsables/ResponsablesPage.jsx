@@ -19,6 +19,7 @@ import * as areaService from '@/features/organizacion/areas/areaService';
 const EMPTY = {
   idArea: '',
   nombreCompleto: '',
+  dpi: '',
   cargo: '',
   correo: '',
   telefono: '',
@@ -63,6 +64,7 @@ export function ResponsablesPage() {
       const payload = {
         idArea: Number(values.idArea),
         nombreCompleto: values.nombreCompleto,
+        dpi: values.dpi,
         cargo: values.cargo || null,
         correo: values.correo || null,
         telefono: values.telefono || null,
@@ -106,6 +108,7 @@ export function ResponsablesPage() {
 
   const columns = [
     { key: 'nombreCompleto', header: 'Nombre' },
+    { key: 'dpi', header: 'DPI' },
     { key: 'cargo', header: 'Cargo' },
     { key: 'areaNombre', header: 'Área' },
     { key: 'correo', header: 'Correo' },
@@ -183,6 +186,7 @@ export function ResponsablesPage() {
               ? {
                   idArea: editing.idArea ?? '',
                   nombreCompleto: editing.nombreCompleto ?? '',
+                  dpi: editing.dpi ?? '',
                   cargo: editing.cargo ?? '',
                   correo: editing.correo ?? '',
                   telefono: editing.telefono ?? '',

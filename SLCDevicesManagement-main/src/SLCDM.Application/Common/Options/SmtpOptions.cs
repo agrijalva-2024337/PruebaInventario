@@ -28,4 +28,6 @@ public sealed class BrandingOptions
     public const string SectionName = "Branding";
 
     public string LetterheadPath { get; set; } = string.Empty;
+
+    public string ActaTemplatePath { get; set; } = string.Empty;
 }
