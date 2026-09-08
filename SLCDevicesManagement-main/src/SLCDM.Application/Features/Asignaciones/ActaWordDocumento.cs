@@ -22,6 +22,7 @@ internal sealed class ActaWordDatos
     public required string Estado { get; init; }
     public required string Motivo { get; init; }
     public required string NombreResponsable { get; init; }
+    public required string Dpi { get; init; }
     public required string NombreEntrega { get; init; }
     public required string CargoEntrega { get; init; }
     public required string NombreRecibe { get; init; }
@@ -46,7 +47,7 @@ internal static class ActaWordDocumento
 
             RellenarEncabezadoCarta(body, datos);
             RellenarTablaEquipo(body, datos);
-            RellenarYoDpi(body, datos.NombreResponsable);
+            RellenarYoDpi(body, datos.NombreResponsable, datos.Dpi);
             QuitarDibujosDelCuerpo(body);
             InsertarFirmas(doc.MainDocumentPart!, body, datos);
             doc.MainDocumentPart!.Document.Save();
@@ -110,7 +111,7 @@ internal static class ActaWordDocumento
         }
     }
 
-    private static void RellenarYoDpi(Body body, string nombre)
+    private static void RellenarYoDpi(Body body, string nombre, string dpi)
     {
         foreach (var p in body.Descendants<Paragraph>())
         {
@@ -123,7 +124,8 @@ internal static class ActaWordDocumento
 
             var idx = texto.IndexOf("Acepto", StringComparison.OrdinalIgnoreCase);
             var resto = idx >= 0 ? texto[idx..].Trim() : string.Empty;
-            SetTexto(p, $"Yo: {nombre}     DPI: ________________  {resto}");
+            var dpiTexto = string.IsNullOrWhiteSpace(dpi) ? "________________" : dpi.Trim();
+            SetTexto(p, $"Yo: {nombre}     DPI: {dpiTexto}  {resto}");
             return;
         }
     }

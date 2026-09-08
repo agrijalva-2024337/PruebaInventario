@@ -61,8 +61,8 @@ internal static class DocxPdfConverter
                 Set(app, "Visible", false);
                 Set(app, "DisplayAlerts", 0);
                 docs = Get(app, "Documents");
-                doc = Call(docs!, "Open", docxPath, false, true);
-                Call(doc!, "SaveAs2", pdfPath, 17);
+                doc = Call(docs!, "Open", docxPath);
+                Call(doc!, "ExportAsFixedFormat", pdfPath, 17);
                 Call(doc!, "Close", false);
                 Call(app, "Quit", false);
             }

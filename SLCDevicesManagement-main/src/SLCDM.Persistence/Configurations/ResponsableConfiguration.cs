@@ -24,6 +24,10 @@ public class ResponsableConfiguration : IEntityTypeConfiguration<Responsable>
             .HasColumnType("varchar(150)")
             .IsRequired();
 
+        builder.Property(r => r.Dpi)
+            .HasColumnName("dpi")
+            .HasColumnType("varchar(13)");
+
         builder.Property(r => r.Cargo)
             .HasColumnName("cargo")
             .HasColumnType("varchar(100)");

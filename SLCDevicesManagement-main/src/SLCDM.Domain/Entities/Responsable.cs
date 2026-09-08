@@ -14,6 +14,9 @@ public class Responsable : SLCDM.Domain.Common.BaseHabilitadoEntity
     [MaxLength(150, ErrorMessage = "El campo nombre completo no debe superar los 150 caracteres")]
     public string NombreCompleto { get; set; } = string.Empty;
 
+    [MaxLength(13, ErrorMessage = "El campo DPI no debe superar los 13 caracteres")]
+    public string? Dpi { get; set; }
+
     [MaxLength(100, ErrorMessage = "El campo cargo no debe superar los 100 caracteres")]
     public string? Cargo { get; set; }
 

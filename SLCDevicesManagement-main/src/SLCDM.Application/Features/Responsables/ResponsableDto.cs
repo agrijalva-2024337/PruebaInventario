@@ -5,6 +5,7 @@ public sealed record ResponsableDto(
     bool Habilitado,
     int IdArea,
     string NombreCompleto,
+    string? Dpi,
     string? Cargo,
     string? Correo,
     string? Telefono);

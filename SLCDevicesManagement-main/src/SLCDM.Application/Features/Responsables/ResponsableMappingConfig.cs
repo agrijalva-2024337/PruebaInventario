@@ -14,6 +14,7 @@ public sealed class ResponsableMappingConfig : IRegister
             .Ignore(dest => dest.Habilitado);
 
         config.NewConfig<Commands.UpdateResponsableCommand, Responsable>()
-            .Ignore(dest => dest.Id);
+            .Ignore(dest => dest.Id)
+            .IgnoreIf((src, _) => string.IsNullOrWhiteSpace(src.Dpi), dest => dest.Dpi);
     }
 }

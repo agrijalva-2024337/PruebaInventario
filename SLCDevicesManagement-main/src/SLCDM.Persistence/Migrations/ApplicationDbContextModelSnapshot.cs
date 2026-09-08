@@ -764,6 +764,11 @@ namespace SLCDM.Persistence.Migrations
                         .HasColumnType("varchar(150)")
                         .HasColumnName("correo");
 
+                    b.Property<string>("Dpi")
+                        .HasMaxLength(13)
+                        .HasColumnType("varchar(13)")
+                        .HasColumnName("dpi");
+
                     b.Property<bool>("Habilitado")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")

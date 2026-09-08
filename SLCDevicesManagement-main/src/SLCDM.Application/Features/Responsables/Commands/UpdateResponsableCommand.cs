@@ -11,6 +11,7 @@ public sealed record UpdateResponsableCommand(
     int Id,
     int IdArea,
     string NombreCompleto,
+    string? Dpi,
     string? Cargo,
     string? Correo,
     string? Telefono,
@@ -30,6 +31,10 @@ public sealed class UpdateResponsableCommandValidator : AbstractValidator<Update
         RuleFor(x => x.NombreCompleto)
             .NotEmpty().WithMessage("El campo nombre completo es obligatorio.")
             .MaximumLength(150).WithMessage("El campo nombre completo no debe superar los 150 caracteres.");
+
+        RuleFor(x => x.Dpi)
+            .Matches(@"^\d{13}$").WithMessage("El campo DPI debe tener 13 dígitos.")
+            .When(x => !string.IsNullOrWhiteSpace(x.Dpi));
 
         RuleFor(x => x.Cargo)
             .MaximumLength(100).WithMessage("El campo cargo no debe superar los 100 caracteres.")

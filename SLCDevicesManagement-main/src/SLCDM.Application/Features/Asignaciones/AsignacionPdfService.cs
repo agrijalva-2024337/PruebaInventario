@@ -92,6 +92,7 @@ public sealed class AsignacionPdfService : IAsignacionPdfService
                 ? "—"
                 : asignacion.Observaciones.Trim(),
             NombreResponsable = quienRecibe,
+            Dpi = asignacion.Responsable?.Dpi ?? string.Empty,
             NombreEntrega = quienEntrega,
             CargoEntrega = usuarioEntrega is null ? "—" : CargoRol(usuarioEntrega.Rol),
             NombreRecibe = quienRecibe,
@@ -109,13 +110,14 @@ public sealed class AsignacionPdfService : IAsignacionPdfService
 
     private string? ResolverPlantilla()
     {
-        var configured = _branding.ActaTemplatePath;
-        if (!string.IsNullOrWhiteSpace(configured) && File.Exists(configured))
+        var names = new[]
         {
-            return configured;
-        }
+            _branding.ActaTemplatePath,
+            Path.Combine(AppContext.BaseDirectory, "wwwroot", "templates", "ActaAsignacion.docx"),
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "templates", "ActaAsignacion.docx"),
+        };
 
-        return null;
+        return names.FirstOrDefault(p => !string.IsNullOrWhiteSpace(p) && File.Exists(p));
     }
 
     private static string Texto(string? value) =>
